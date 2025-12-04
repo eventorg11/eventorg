@@ -35,6 +35,17 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "app.wsgi.application"
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'event-org',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
+}
+
 STATIC_URL = "static/"
 
 STATICFILES_DIRS = [
