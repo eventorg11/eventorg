@@ -13,13 +13,14 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>Московский университет имени С.Ю. Витте</h1>
-                    <p class="subtitle">Система организации научной конференции</p>
+                    <a href="{% url 'index' %}" class="logo-link">
+                        <h1>Московский университет имени С.Ю. Витте</h1>
+                        <p class="subtitle">Система организации научной конференции</p>
+                    </a>
                 </div>
                 <nav class="main-nav">
                     <ul>
-                        <li><a href="{% url 'index' %}">Главная</a></li>
-                        <li><a href="#about">О конференции</a></li>
+                        <li><a href="{% url 'about' %}">О нас</a></li>
                         <li><a href="#events">Мероприятия</a></li>
                         <li><a href="#contact">Контакты</a></li>
                         <li><a href="#login">Вход</a></li>
@@ -46,7 +47,7 @@
                     <h3>Быстрые ссылки</h3>
                     <ul>
                         <li><a href="{% url 'index' %}">Главная</a></li>
-                        <li><a href="#about">О нас</a></li>
+                        <li><a href="{% url 'about' %}">О нас</a></li>
                         <li><a href="#contact">Контакты</a></li>
                     </ul>
                 </div>
