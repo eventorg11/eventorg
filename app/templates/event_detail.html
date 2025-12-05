@@ -3,11 +3,39 @@
 
 {% block title %}{{ conference.title }} - Система организации научной конференции{% endblock %}
 
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            {% if is_curator_of_event %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'profile' %}" class="breadcrumb-link">Личный кабинет</a>
+            </li>
+            {% else %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'events' %}" class="breadcrumb-link">Мероприятия</a>
+            </li>
+            {% endif %}
+            <li class="breadcrumb-item active">
+                <span>{{ conference.title|truncatewords:5 }}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">
         <div class="event-detail-header">
+            {% if is_curator_of_event %}
+            <a href="{% url 'profile' %}" class="back-link">← Вернуться в личный кабинет</a>
+            {% else %}
             <a href="{% url 'events' %}" class="back-link">← Вернуться к списку мероприятий</a>
+            {% endif %}
             <h1 class="page-title">{{ conference.title }}</h1>
             <div class="event-status-badge status-{{ conference.status }}">
                 <span>{{ conference.get_status_display }}</span>

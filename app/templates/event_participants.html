@@ -3,6 +3,27 @@
 
 {% block title %}Участники мероприятия - {{ conference.title }}{% endblock %}
 
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'profile' %}" class="breadcrumb-link">Личный кабинет</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'event_detail' event_id=conference.id %}" class="breadcrumb-link">{{ conference.title|truncatewords:5 }}</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>Участники</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="profile-section">
     <div class="container">

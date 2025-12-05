@@ -3,6 +3,21 @@
 
 {% block title %}Мероприятия - Система организации научной конференции{% endblock %}
 
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>Мероприятия</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">

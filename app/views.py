@@ -91,15 +91,27 @@ def event_detail(request, event_id):
     """Детализированная страница просмотра мероприятия"""
     conference = get_object_or_404(Conference, id=event_id)
     is_registered = False
+    is_curator_of_event = False
+    
     if request.user.is_authenticated:
         is_registered = EventRegistration.objects.filter(
             user=request.user,
             conference=conference
         ).exists()
+        
+        user_profile = getattr(request.user, 'profile', None)
+        is_curator = user_profile and user_profile.is_curator()
+        is_admin = user_profile and user_profile.is_admin()
+        
+        if is_curator and conference.curator == request.user:
+            is_curator_of_event = True
+        elif is_admin:
+            is_curator_of_event = True
     
     context = {
         'conference': conference,
         'is_registered': is_registered,
+        'is_curator_of_event': is_curator_of_event,
     }
     return render(request, "event_detail.html", context)
 

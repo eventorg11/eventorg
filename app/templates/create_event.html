@@ -3,6 +3,24 @@
 
 {% block title %}Создание мероприятия - Система организации научной конференции{% endblock %}
 
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'profile' %}" class="breadcrumb-link">Личный кабинет</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>Создание мероприятия</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="create-event-section">
     <div class="container">
