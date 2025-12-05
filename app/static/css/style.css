@@ -430,15 +430,18 @@ body {
     font-size: 1.05rem;
 }
 
-.placeholder-image {
-    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-    height: 300px;
+.university-image {
+    width: 100%;
+    height: auto;
     border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
+    box-shadow: var(--shadow);
+    object-fit: cover;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.university-image:hover {
+    transform: scale(1.02);
+    box-shadow: var(--shadow-hover);
 }
 
 .events-section {

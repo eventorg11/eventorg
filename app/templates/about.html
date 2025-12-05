@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}О нас - Система организации научной конференции{% endblock %}
 
@@ -42,9 +43,7 @@
                 </p>
             </div>
             <div class="about-image">
-                <div class="placeholder-image">
-                    <span>Изображение университета</span>
-                </div>
+                <img src="{% static 'img/universitet.jpeg' %}" alt="Московский университет имени С.Ю. Витте" class="university-image">
             </div>
         </div>
     </div>
