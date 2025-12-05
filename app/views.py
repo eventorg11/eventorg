@@ -20,12 +20,23 @@ from app.forms import (
 )
 
 
+def update_conference_statuses():
+    """Автоматически обновляет статус конференций: если start_date прошла, ставит 'completed'"""
+    now = timezone.now()
+    Conference.objects.filter(
+        status='not_started',
+        start_date__lt=now
+    ).update(status='completed')
+
+
 def index(request):
     """Главная страница с ближайшими мероприятиями"""
+    update_conference_statuses()
     now = timezone.now()
     
     upcoming_conferences = Conference.objects.filter(
-        start_date__gte=now
+        start_date__gte=now,
+        status='not_started'
     ).order_by('start_date')[:2]
     
     if upcoming_conferences.count() < 2:
@@ -44,6 +55,7 @@ def about(request):
 
 def events(request):
     """Страница со списком всех мероприятий с поиском и фильтрами"""
+    update_conference_statuses()
     conferences = Conference.objects.all()
     
     search_query = request.GET.get('search', '').strip()
@@ -128,6 +140,7 @@ def faq(request):
 
 def event_detail(request, event_id):
     """Детализированная страница просмотра мероприятия"""
+    update_conference_statuses()
     conference = get_object_or_404(Conference, id=event_id)
     is_registered = False
     is_curator_of_event = False
@@ -223,6 +236,7 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     """Страница личного кабинета пользователя"""
+    update_conference_statuses()
     user_profile = getattr(request.user, 'profile', None)
     is_curator = user_profile and user_profile.is_curator()
     is_admin = user_profile and user_profile.is_admin()
@@ -590,6 +604,7 @@ def participation_rules(request):
 
 def archive(request):
     """Страница архива мероприятий"""
+    update_conference_statuses()
     completed_conferences = Conference.objects.filter(status='completed').order_by('-start_date')
     
     context = {
