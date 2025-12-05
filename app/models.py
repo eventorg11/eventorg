@@ -203,3 +203,44 @@ class Conference(models.Model):
         """Проверяет, является ли конференция прошедшей"""
         return self.status == 'completed'
 
+
+class EventRegistration(models.Model):
+    """Модель для регистрации пользователей на мероприятия"""
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='event_registrations'
+    )
+    
+    conference = models.ForeignKey(
+        Conference,
+        on_delete=models.CASCADE,
+        verbose_name='Конференция',
+        related_name='registrations'
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата регистрации'
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+    
+    class Meta:
+        verbose_name = 'Регистрация на мероприятие'
+        verbose_name_plural = 'Регистрации на мероприятия'
+        unique_together = ['user', 'conference']
+        indexes = [
+            models.Index(fields=['user', 'conference']),
+            models.Index(fields=['conference']),
+        ]
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.conference.title}"
+
