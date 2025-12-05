@@ -201,8 +201,6 @@ class Conference(models.Model):
         if timezone.is_naive(deadline):
             default_tz = timezone.get_current_timezone()
             deadline = timezone.make_aware(deadline, default_tz)
-        elif timezone.is_aware(deadline):
-            deadline = timezone.localtime(deadline)
         
         return now <= deadline
     

@@ -4,7 +4,6 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import IntegrityError
-from django.conf import settings
 from app.models import Conference, EventRegistration
 from app.forms import CustomUserCreationForm, CustomAuthenticationForm
 
@@ -55,12 +54,6 @@ def event_detail(request, event_id):
     context = {
         'conference': conference,
         'is_registered': is_registered,
-        'debug_info': {
-            'status': conference.status,
-            'registration_deadline': conference.registration_deadline,
-            'now': timezone.now(),
-            'is_registration_open': conference.is_registration_open,
-        } if settings.DEBUG else None,
     }
     return render(request, "event_detail.html", context)
 
