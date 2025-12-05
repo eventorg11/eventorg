@@ -459,6 +459,19 @@ body {
     font-weight: 500;
 }
 
+.conference-action {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.btn-detail {
+    width: 100%;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+}
+
 .no-events {
     text-align: center;
     padding: 60px 20px;
