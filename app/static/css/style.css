@@ -296,7 +296,7 @@ body {
 
 .events-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 30px;
 }
 
@@ -470,6 +470,15 @@ body {
     text-align: center;
     text-decoration: none;
     display: block;
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-detail:hover {
+    background-color: #2980b9;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 .no-events {
