@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from app.models import Conference
 
 
@@ -19,3 +19,9 @@ def events(request):
 def contact(request):
     """Страница контактов"""
     return render(request, "contact.html")
+
+
+def event_detail(request, event_id):
+    """Детализированная страница просмотра мероприятия"""
+    conference = get_object_or_404(Conference, id=event_id)
+    return render(request, "event_detail.html", {"conference": conference})
