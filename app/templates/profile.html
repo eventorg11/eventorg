@@ -59,10 +59,13 @@
 
             {% if is_curator %}
             <div class="registrations-card">
-                <h2 class="section-title">
-                    <span class="title-icon">📋</span>
-                    Мои мероприятия
-                </h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 class="section-title" style="margin: 0;">
+                        <span class="title-icon">📋</span>
+                        Мои мероприятия
+                    </h2>
+                    <a href="{% url 'create_event' %}" class="btn btn-primary">+ Создать мероприятие</a>
+                </div>
                 {% if curated_conferences %}
                 <div class="registrations-list">
                     {% for conference in curated_conferences %}

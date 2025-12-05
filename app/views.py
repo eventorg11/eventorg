@@ -9,6 +9,7 @@ from app.forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     ProfileUpdateForm,
+    ConferenceCreationForm,
 )
 
 
@@ -268,3 +269,31 @@ def remove_participant(request, registration_id):
         })
     
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
+
+
+@login_required
+def create_event_view(request):
+    """Страница создания мероприятия для куратора"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_curator = user_profile and user_profile.is_curator()
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_curator and not is_admin:
+        return redirect('profile')
+    
+    if request.method == 'POST':
+        form = ConferenceCreationForm(request.POST)
+        if form.is_valid():
+            conference = form.save(commit=False)
+            conference.curator = request.user
+            conference.status = 'not_started'
+            conference.save()
+            return redirect('profile')
+    else:
+        form = ConferenceCreationForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'create_event.html', context)
