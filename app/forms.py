@@ -61,3 +61,25 @@ class CustomUserCreationForm(UserCreationForm):
         self.fields["password2"].widget.attrs.update(
             {"class": "form-control", "placeholder": "Подтвердите пароль"}
         )
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    """Форма входа пользователя"""
+
+    username = forms.CharField(
+        label="Имя пользователя",
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Введите имя пользователя",
+                "autofocus": True,
+            }
+        ),
+    )
+
+    password = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Введите пароль"}
+        ),
+    )
