@@ -134,3 +134,23 @@ def profile_view(request):
         'registrations': registrations,
     }
     return render(request, 'profile.html', context)
+
+
+@login_required
+def cancel_registration(request, registration_id):
+    """Отмена регистрации пользователя на мероприятие"""
+    registration = get_object_or_404(
+        EventRegistration,
+        id=registration_id,
+        user=request.user
+    )
+    
+    if request.method == 'POST':
+        conference_title = registration.conference.title
+        registration.delete()
+        return JsonResponse({
+            'success': True,
+            'message': f'Регистрация на мероприятие "{conference_title}" отменена'
+        })
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=405)

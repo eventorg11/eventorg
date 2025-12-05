@@ -115,6 +115,71 @@
 </div>
 {% endblock %}
 
+{% block extra_js %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const cancelButtons = document.querySelectorAll('.cancel-registration-btn');
+        
+        cancelButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                const registrationId = this.getAttribute('data-registration-id');
+                const conferenceTitle = this.getAttribute('data-conference-title');
+                
+                if (!confirm('Вы уверены, что хотите отменить регистрацию на мероприятие "' + conferenceTitle + '"?')) {
+                    return;
+                }
+                
+                const url = '/profile/cancel-registration/' + registrationId + '/';
+                const csrftoken = getCookie('csrftoken');
+                
+                button.disabled = true;
+                button.textContent = 'Отмена...';
+                
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message || 'Регистрация успешно отменена');
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Произошла ошибка при отмене регистрации');
+                        button.disabled = false;
+                        button.textContent = 'Отменить регистрацию';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отмене регистрации');
+                    button.disabled = false;
+                    button.textContent = 'Отменить регистрацию';
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
+
 {% block extra_css %}
 <style>
 .profile-section {
