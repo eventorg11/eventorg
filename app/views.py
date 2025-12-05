@@ -1,11 +1,15 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import IntegrityError
 from app.models import Conference, EventRegistration
-from app.forms import CustomUserCreationForm, CustomAuthenticationForm
+from app.forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    ProfileUpdateForm,
+)
 
 
 def index(request):
@@ -154,3 +158,44 @@ def cancel_registration(request, registration_id):
         })
     
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=405)
+
+
+@login_required
+def settings_view(request):
+    """Страница настроек пользователя"""
+    from django.contrib.auth.forms import PasswordChangeForm
+
+    profile_success = False
+    password_success = False
+
+    profile_form = ProfileUpdateForm(instance=request.user)
+    password_form = PasswordChangeForm(user=request.user)
+    for field in password_form.fields.values():
+        field.widget.attrs.update({"class": "form-control"})
+
+    if request.method == 'POST':
+        if 'profile_submit' in request.POST:
+            profile_form = ProfileUpdateForm(request.POST, instance=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                profile_success = True
+            password_form = PasswordChangeForm(user=request.user)
+            for field in password_form.fields.values():
+                field.widget.attrs.update({"class": "form-control"})
+        elif 'password_submit' in request.POST:
+            password_form = PasswordChangeForm(user=request.user, data=request.POST)
+            profile_form = ProfileUpdateForm(instance=request.user)
+            for field in password_form.fields.values():
+                field.widget.attrs.update({"class": "form-control"})
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)
+                password_success = True
+
+    context = {
+        'profile_form': profile_form,
+        'password_form': password_form,
+        'profile_success': profile_success,
+        'password_success': password_success,
+    }
+    return render(request, 'settings.html', context)
