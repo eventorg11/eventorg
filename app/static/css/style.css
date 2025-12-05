@@ -94,6 +94,16 @@ body {
     border-bottom: 2px solid white;
 }
 
+.main-nav .user-name {
+    font-weight: 600;
+    cursor: default;
+}
+
+.main-nav .user-name:hover {
+    border-bottom: none;
+    opacity: 1;
+}
+
 .main-content {
     min-height: calc(100vh - 200px);
 }
