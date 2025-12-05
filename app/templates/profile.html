@@ -57,6 +57,60 @@
                 </div>
             </div>
 
+            {% if is_curator %}
+            <div class="registrations-card">
+                <h2 class="section-title">
+                    <span class="title-icon">📋</span>
+                    Мои мероприятия
+                </h2>
+                {% if curated_conferences %}
+                <div class="registrations-list">
+                    {% for conference in curated_conferences %}
+                    <div class="registration-item">
+                        <div class="registration-header">
+                            <h3 class="registration-title">{{ conference.title }}</h3>
+                            <div class="registration-header-right">
+                                <span class="registration-date-small">📅 {{ conference.created_at|date:"d.m.Y H:i" }}</span>
+                                <span class="registration-status-badge status-badge status-{{ conference.status }}">
+                                    {{ conference.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="registration-details">
+                            <div class="detail-row">
+                                <span class="detail-icon">📅</span>
+                                <div class="detail-content">
+                                    <span class="detail-label">Дата мероприятия</span>
+                                    <span class="detail-value">{{ conference.start_date|date:"d.m.Y H:i" }}</span>
+                                </div>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-icon">📍</span>
+                                <div class="detail-content">
+                                    <span class="detail-label">Место проведения</span>
+                                    <span class="detail-value">
+                                        {% if conference.is_online %}
+                                            Онлайн
+                                        {% else %}
+                                            {{ conference.location }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="registration-actions">
+                            <a href="{% url 'event_detail' event_id=conference.id %}" class="btn btn-secondary btn-sm">Подробнее</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-registrations">
+                    <p class="no-registrations-message">Вы еще не создали ни одного мероприятия.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
             <div class="registrations-card">
                 <h2 class="section-title">Мои мероприятия</h2>
                 {% if registrations %}
@@ -110,6 +164,7 @@
                 </div>
                 {% endif %}
             </div>
+            {% endif %}
         </div>
     </div>
 </div>

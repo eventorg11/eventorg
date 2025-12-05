@@ -130,13 +130,26 @@ def logout_view(request):
 @login_required
 def profile_view(request):
     """Страница личного кабинета пользователя"""
-    registrations = EventRegistration.objects.filter(
-        user=request.user
-    ).select_related('conference').order_by('-created_at')
+    user_profile = getattr(request.user, 'profile', None)
+    is_curator = user_profile and user_profile.is_curator()
     
-    context = {
-        'registrations': registrations,
-    }
+    if is_curator:
+        curated_conferences = Conference.objects.filter(
+            curator=request.user
+        ).order_by('-created_at')
+        context = {
+            'is_curator': True,
+            'curated_conferences': curated_conferences,
+        }
+    else:
+        registrations = EventRegistration.objects.filter(
+            user=request.user
+        ).select_related('conference').order_by('-created_at')
+        context = {
+            'is_curator': False,
+            'registrations': registrations,
+        }
+    
     return render(request, 'profile.html', context)
 
 
