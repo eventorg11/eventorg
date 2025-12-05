@@ -13,16 +13,6 @@
                     <p class="auth-subtitle">Создайте аккаунт для участия в конференциях</p>
                 </div>
                 
-                {% if messages %}
-                    <div class="auth-messages">
-                        {% for message in messages %}
-                            <div class="message message-{{ message.tags }}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-                
                 <form method="post" class="auth-form">
                     {% csrf_token %}
                     
