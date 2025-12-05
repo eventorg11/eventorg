@@ -253,3 +253,75 @@ class EventRegistration(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.conference.title}"
 
+
+class ContactMessage(models.Model):
+    """Модель для сообщений обратной связи"""
+    
+    STATUS_CHOICES = [
+        ('new', 'Новое'),
+        ('read', 'Прочитано'),
+        ('replied', 'Отвечено'),
+    ]
+    
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Имя',
+        help_text='Имя отправителя'
+    )
+    
+    email = models.EmailField(
+        verbose_name='Email',
+        help_text='Email адрес для обратной связи'
+    )
+    
+    subject = models.CharField(
+        max_length=200,
+        verbose_name='Тема',
+        help_text='Тема сообщения'
+    )
+    
+    message = models.TextField(
+        verbose_name='Сообщение',
+        help_text='Текст сообщения'
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='new',
+        verbose_name='Статус',
+        help_text='Статус обработки сообщения'
+    )
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Пользователь',
+        help_text='Пользователь, отправивший сообщение (если авторизован)',
+        related_name='contact_messages'
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+    
+    class Meta:
+        verbose_name = 'Сообщение обратной связи'
+        verbose_name_plural = 'Сообщения обратной связи'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name} - {self.subject} ({self.created_at.strftime('%d.%m.%Y %H:%M')})"
+

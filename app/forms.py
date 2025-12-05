@@ -207,3 +207,54 @@ class ConferenceCreationForm(forms.ModelForm):
         self.fields['start_date'].required = True
         self.fields['location'].required = False
         self.fields['online_link'].required = False
+
+
+class ContactForm(forms.Form):
+    """Форма обратной связи"""
+    
+    name = forms.CharField(
+        required=True,
+        label="Имя",
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Введите ваше имя"
+            }
+        ),
+    )
+    
+    email = forms.EmailField(
+        required=True,
+        label="Email",
+        widget=forms.EmailInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Введите ваш email"
+            }
+        ),
+    )
+    
+    subject = forms.CharField(
+        required=True,
+        label="Тема",
+        max_length=200,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Тема сообщения"
+            }
+        ),
+    )
+    
+    message = forms.CharField(
+        required=True,
+        label="Сообщение",
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Введите ваше сообщение",
+                "rows": 6
+            }
+        ),
+    )

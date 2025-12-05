@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Обратная связь - Система организации научной конференции{% endblock %}
+
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>Обратная связь</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">Обратная связь</h1>
+        <p class="page-subtitle">Отправьте нам ваше сообщение, и мы обязательно ответим</p>
+    </div>
+</div>
+
+<div class="feedback-section">
+    <div class="container">
+        {% if success_message %}
+        <div class="feedback-success-wrapper">
+            <div class="alert alert-success feedback-alert">
+                <div class="alert-icon">✓</div>
+                <div class="alert-content">
+                    <h3>Сообщение отправлено!</h3>
+                    <p>{{ success_message }}</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="feedback-content">
+            <div class="feedback-form-wrapper">
+                <div class="feedback-form-header">
+                    <h2 class="feedback-form-title">Напишите нам</h2>
+                    <p class="feedback-form-subtitle">Заполните форму ниже, и мы свяжемся с вами в ближайшее время</p>
+                </div>
+                
+                <div class="feedback-form-card">
+                    <form method="post" class="feedback-form">
+                        {% csrf_token %}
+                        
+                        <div class="feedback-form-row">
+                            <div class="form-group feedback-form-group">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">
+                                    <span class="label-icon">👤</span>
+                                    {{ form.name.label }}
+                                </label>
+                                {{ form.name }}
+                                {% if form.name.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.name.errors %}
+                                            <span class="error-text">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group feedback-form-group">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    <span class="label-icon">📧</span>
+                                    {{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="field-errors">
+                                        {% for error in form.email.errors %}
+                                            <span class="error-text">{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group feedback-form-group">
+                            <label for="{{ form.subject.id_for_label }}" class="form-label">
+                                <span class="label-icon">📝</span>
+                                {{ form.subject.label }}
+                            </label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.subject.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group feedback-form-group">
+                            <label for="{{ form.message.id_for_label }}" class="form-label">
+                                <span class="label-icon">💬</span>
+                                {{ form.message.label }}
+                            </label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                                <div class="field-errors">
+                                    {% for error in form.message.errors %}
+                                        <span class="error-text">{{ error }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="feedback-form-actions">
+                            <button type="submit" class="btn btn-primary btn-feedback">
+                                <span class="btn-icon">✉️</span>
+                                Отправить сообщение
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

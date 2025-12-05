@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.db import IntegrityError, models
-from app.models import Conference, EventRegistration, UserProfile
+from app.models import Conference, EventRegistration, UserProfile, ContactMessage
 from django.contrib.auth import get_user_model
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill
@@ -16,6 +16,7 @@ from app.forms import (
     CustomAuthenticationForm,
     ProfileUpdateForm,
     ConferenceCreationForm,
+    ContactForm,
 )
 
 
@@ -85,6 +86,39 @@ def events(request):
 def contact(request):
     """Страница контактов"""
     return render(request, "contact.html")
+
+
+def feedback(request):
+    """Страница формы обратной связи"""
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            contact_message = ContactMessage.objects.create(
+                name=form.cleaned_data['name'],
+                email=form.cleaned_data['email'],
+                subject=form.cleaned_data['subject'],
+                message=form.cleaned_data['message'],
+                user=request.user if request.user.is_authenticated else None,
+                status='new'
+            )
+            context = {
+                'form': ContactForm(),
+                'success_message': 'Ваше сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.',
+            }
+            if request.user.is_authenticated:
+                context['form'].fields['name'].initial = request.user.get_full_name() or request.user.username
+                context['form'].fields['email'].initial = request.user.email
+            return render(request, "feedback.html", context)
+    else:
+        form = ContactForm()
+        if request.user.is_authenticated:
+            form.fields['name'].initial = request.user.get_full_name() or request.user.username
+            form.fields['email'].initial = request.user.email
+    
+    context = {
+        'form': form,
+    }
+    return render(request, "feedback.html", context)
 
 
 def faq(request):
