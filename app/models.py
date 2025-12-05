@@ -1,15 +1,14 @@
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 
 
 class Conference(models.Model):
     """Модель для конференций/мероприятий"""
     
     STATUS_CHOICES = [
-        ('planned', 'Запланировано'),
-        ('ongoing', 'В процессе'),
-        ('completed', 'Завершено'),
-        ('cancelled', 'Отменено'),
+        ('not_started', 'Не началась'),
+        ('completed', 'Завершена'),
     ]
     
     title = models.CharField(
@@ -35,11 +34,6 @@ class Conference(models.Model):
         help_text='Дата и время начала конференции'
     )
     
-    end_date = models.DateTimeField(
-        verbose_name='Дата окончания',
-        help_text='Дата и время окончания конференции'
-    )
-    
     location = models.CharField(
         max_length=200,
         verbose_name='Место проведения',
@@ -62,7 +56,7 @@ class Conference(models.Model):
     status = models.CharField(
         max_length=20,
         choices=STATUS_CHOICES,
-        default='planned',
+        default='not_started',
         verbose_name='Статус',
         help_text='Текущий статус конференции'
     )
@@ -104,6 +98,16 @@ class Conference(models.Model):
         verbose_name='Дата обновления'
     )
     
+    curator = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Куратор',
+        help_text='Пользователь-куратор, создавший данное мероприятие',
+        related_name='curated_conferences'
+    )
+    
     class Meta:
         verbose_name = 'Конференция'
         verbose_name_plural = 'Конференции'
@@ -119,17 +123,17 @@ class Conference(models.Model):
     def is_registration_open(self):
         """Проверяет, открыта ли регистрация"""
         if not self.registration_deadline:
-            return self.status == 'planned'
+            return self.status == 'not_started'
         return (
-            self.status == 'planned' and 
+            self.status == 'not_started' and 
             timezone.now() <= self.registration_deadline
         )
     
     def is_upcoming(self):
         """Проверяет, является ли конференция предстоящей"""
-        return self.start_date > timezone.now() and self.status == 'planned'
+        return self.start_date > timezone.now() and self.status == 'not_started'
     
     def is_past(self):
         """Проверяет, является ли конференция прошедшей"""
-        return self.end_date < timezone.now() or self.status == 'completed'
+        return self.status == 'completed'
 
