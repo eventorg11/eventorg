@@ -61,35 +61,70 @@
             <div class="registrations-card">
                 <h2 class="section-title">
                     <span class="title-icon">👑</span>
-                    Назначить куратора
+                    Управление пользователями
                 </h2>
-                <div class="assign-curator-section">
-                    <div class="dropdown-container">
-                        <button id="dropdownToggle" class="dropdown-toggle">
-                            <span id="selectedUser">Выберите пользователя</span>
-                            <span class="dropdown-arrow">▼</span>
-                        </button>
-                        <div id="userDropdown" class="user-dropdown-menu" style="display: none;">
-                            <div class="dropdown-search">
-                                <input type="text" id="userSearch" class="form-control" placeholder="Поиск..." autocomplete="off">
-                            </div>
-                            <div class="user-dropdown-list">
-                                {% for user in users %}
-                                <div class="user-dropdown-item" data-user-id="{{ user.id }}" data-username="{{ user.username }}">
-                                    <span class="user-username">{{ user.username }}</span>
-                                    <span class="user-role">
-                                        {% if user.profile %}
-                                            {{ user.profile.get_role_display }}
-                                        {% else %}
-                                            Студент
-                                        {% endif %}
-                                    </span>
+                <div class="user-management-section">
+                    <div class="management-row">
+                        <div class="management-item">
+                            <label class="management-label">Назначить куратора</label>
+                            <div class="dropdown-container">
+                                <button id="dropdownToggle" class="dropdown-toggle">
+                                    <span id="selectedUser">Выберите пользователя</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </button>
+                                <div id="userDropdown" class="user-dropdown-menu" style="display: none;">
+                                    <div class="dropdown-search">
+                                        <input type="text" id="userSearch" class="form-control" placeholder="Поиск..." autocomplete="off">
+                                    </div>
+                                    <div class="user-dropdown-list">
+                                        {% for user in users %}
+                                        <div class="user-dropdown-item" data-user-id="{{ user.id }}" data-username="{{ user.username }}">
+                                            <span class="user-username">{{ user.username }}</span>
+                                            <span class="user-role">
+                                                {% if user.profile %}
+                                                    {{ user.profile.get_role_display }}
+                                                {% else %}
+                                                    Студент
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
-                                {% endfor %}
                             </div>
+                            <button id="assignCuratorBtn" class="btn btn-primary" disabled>Назначить куратором</button>
+                        </div>
+                        
+                        <div class="management-item">
+                            <label class="management-label">Удалить пользователя</label>
+                            <div class="dropdown-container">
+                                <button id="deleteDropdownToggle" class="dropdown-toggle">
+                                    <span id="selectedDeleteUser">Выберите пользователя</span>
+                                    <span class="dropdown-arrow">▼</span>
+                                </button>
+                                <div id="deleteUserDropdown" class="user-dropdown-menu" style="display: none;">
+                                    <div class="dropdown-search">
+                                        <input type="text" id="deleteUserSearch" class="form-control" placeholder="Поиск..." autocomplete="off">
+                                    </div>
+                                    <div class="user-dropdown-list">
+                                        {% for user in users %}
+                                        <div class="user-dropdown-item" data-user-id="{{ user.id }}" data-username="{{ user.username }}">
+                                            <span class="user-username">{{ user.username }}</span>
+                                            <span class="user-role">
+                                                {% if user.profile %}
+                                                    {{ user.profile.get_role_display }}
+                                                {% else %}
+                                                    Студент
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            <button id="deleteUserBtn" class="btn btn-danger" disabled>Удалить пользователя</button>
                         </div>
                     </div>
-                    <button id="assignCuratorBtn" class="btn btn-primary" disabled>Назначить куратором</button>
                 </div>
             </div>
             {% elif is_curator %}
@@ -247,6 +282,38 @@
         </div>
     </div>
 </div>
+
+<div class="custom-dialog" id="confirmAssignDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title">Подтверждение назначения</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('confirmAssignDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="confirmAssignMessage"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary" onclick="closeCustomDialog('confirmAssignDialog')">Отмена</button>
+            <button class="btn btn-primary" id="confirmAssignBtn">Назначить</button>
+        </div>
+    </div>
+</div>
+
+<div class="custom-dialog" id="confirmDeleteUserDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title">Подтверждение удаления</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('confirmDeleteUserDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="confirmDeleteUserMessage"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary" onclick="closeCustomDialog('confirmDeleteUserDialog')">Отмена</button>
+            <button class="btn btn-danger" id="confirmDeleteUserBtn">Удалить</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -369,26 +436,36 @@
         const selectedUserSpan = document.getElementById('selectedUser');
         const assignBtn = document.getElementById('assignCuratorBtn');
         let selectedUserId = null;
-        let allUsers = Array.from(document.querySelectorAll('.user-dropdown-item'));
+        let allUsers = Array.from(document.querySelectorAll('#userDropdown .user-dropdown-item'));
+        
+        const deleteDropdownToggle = document.getElementById('deleteDropdownToggle');
+        const deleteDropdown = document.getElementById('deleteUserDropdown');
+        const deleteSearchInput = document.getElementById('deleteUserSearch');
+        const selectedDeleteUserSpan = document.getElementById('selectedDeleteUser');
+        const deleteUserBtn = document.getElementById('deleteUserBtn');
+        let selectedDeleteUserId = null;
+        let allDeleteUsers = Array.from(document.querySelectorAll('#deleteUserDropdown .user-dropdown-item'));
+        
+        function filterUsers(query, items) {
+            const lowerQuery = query.toLowerCase();
+            items.forEach(item => {
+                const username = item.getAttribute('data-username').toLowerCase();
+                if (username.includes(lowerQuery)) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
         
         if (dropdownToggle && dropdown && searchInput && selectedUserSpan && assignBtn) {
-            function filterUsers(query) {
-                const lowerQuery = query.toLowerCase();
-                allUsers.forEach(item => {
-                    const username = item.getAttribute('data-username').toLowerCase();
-                    if (username.includes(lowerQuery)) {
-                        item.style.display = 'flex';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            }
-            
             dropdownToggle.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const isOpen = dropdown.style.display === 'flex';
                 dropdown.style.display = isOpen ? 'none' : 'flex';
+                if (deleteDropdown) deleteDropdown.style.display = 'none';
                 dropdownToggle.classList.toggle('active', !isOpen);
+                if (deleteDropdownToggle) deleteDropdownToggle.classList.remove('active');
                 if (!isOpen) {
                     searchInput.focus();
                 }
@@ -396,7 +473,7 @@
             
             searchInput.addEventListener('input', function() {
                 const query = this.value.trim();
-                filterUsers(query);
+                filterUsers(query, allUsers);
             });
             
             searchInput.addEventListener('click', function(e) {
@@ -413,31 +490,40 @@
                     dropdownToggle.classList.remove('active');
                     assignBtn.disabled = false;
                     searchInput.value = '';
-                    filterUsers('');
+                    filterUsers('', allUsers);
                 });
-            });
-            
-            document.addEventListener('click', function(e) {
-                if (!dropdownToggle.contains(e.target) && !dropdown.contains(e.target)) {
-                    dropdown.style.display = 'none';
-                    dropdownToggle.classList.remove('active');
-                }
             });
             
             assignBtn.addEventListener('click', function() {
                 if (!selectedUserId) return;
                 
                 const username = selectedUserSpan.textContent;
-                const confirmMessage = `Вы уверены, что хотите назначить пользователя "${username}" куратором?`;
-                
-                if (!confirm(confirmMessage)) {
+                document.getElementById('confirmAssignMessage').textContent = 
+                    `Вы уверены, что хотите назначить пользователя "${username}" куратором?`;
+                const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+                if (confirmAssignBtn) {
+                    confirmAssignBtn.setAttribute('data-user-id', selectedUserId);
+                }
+                showCustomDialog('confirmAssignDialog');
+            });
+        }
+        
+        const confirmAssignBtn = document.getElementById('confirmAssignBtn');
+        if (confirmAssignBtn) {
+            confirmAssignBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                if (!userId) {
+                    closeCustomDialog('confirmAssignDialog');
+                    showMessage('Ошибка', 'Пользователь не выбран', 'error');
                     return;
                 }
                 
-                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                const csrftoken = getCookie('csrftoken');
                 
                 const formData = new FormData();
-                formData.append('user_id', selectedUserId);
+                formData.append('user_id', userId);
+                
+                closeCustomDialog('confirmAssignDialog');
                 
                 fetch('{% url "assign_curator" %}', {
                     method: 'POST',
@@ -449,20 +535,149 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message);
-                        selectedUserSpan.textContent = 'Выберите пользователя';
+                        showMessage('Успешно', data.message, 'success');
+                        const selectedUserSpan = document.getElementById('selectedUser');
+                        const assignBtn = document.getElementById('assignCuratorBtn');
+                        if (selectedUserSpan) selectedUserSpan.textContent = 'Выберите пользователя';
                         selectedUserId = null;
-                        assignBtn.disabled = true;
-                        location.reload();
+                        if (assignBtn) assignBtn.disabled = true;
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
                     } else {
-                        alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                        showMessage('Ошибка', data.error || 'Неизвестная ошибка', 'error');
                     }
                 })
                 .catch(error => {
-                    alert('Произошла ошибка при назначении куратора');
+                    showMessage('Ошибка', 'Произошла ошибка при назначении куратора', 'error');
                 });
             });
         }
+        
+        const confirmAssignDialog = document.getElementById('confirmAssignDialog');
+        if (confirmAssignDialog) {
+            confirmAssignDialog.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCustomDialog('confirmAssignDialog');
+                }
+            });
+        }
+        
+        if (deleteDropdownToggle && deleteDropdown && deleteSearchInput && selectedDeleteUserSpan && deleteUserBtn) {
+            deleteDropdownToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = deleteDropdown.style.display === 'flex';
+                deleteDropdown.style.display = isOpen ? 'none' : 'flex';
+                if (dropdown) dropdown.style.display = 'none';
+                deleteDropdownToggle.classList.toggle('active', !isOpen);
+                if (dropdownToggle) dropdownToggle.classList.remove('active');
+                if (!isOpen) {
+                    deleteSearchInput.focus();
+                }
+            });
+            
+            deleteSearchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                filterUsers(query, allDeleteUsers);
+            });
+            
+            deleteSearchInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            allDeleteUsers.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectedDeleteUserId = this.getAttribute('data-user-id');
+                    const username = this.getAttribute('data-username');
+                    selectedDeleteUserSpan.textContent = username;
+                    deleteDropdown.style.display = 'none';
+                    deleteDropdownToggle.classList.remove('active');
+                    deleteUserBtn.disabled = false;
+                    deleteSearchInput.value = '';
+                    filterUsers('', allDeleteUsers);
+                });
+            });
+            
+            deleteUserBtn.addEventListener('click', function() {
+                if (!selectedDeleteUserId) return;
+                
+                const username = selectedDeleteUserSpan.textContent;
+                document.getElementById('confirmDeleteUserMessage').textContent = 
+                    `Вы уверены, что хотите удалить пользователя "${username}"? Это действие нельзя отменить!`;
+                const confirmDeleteUserBtn = document.getElementById('confirmDeleteUserBtn');
+                if (confirmDeleteUserBtn) {
+                    confirmDeleteUserBtn.setAttribute('data-user-id', selectedDeleteUserId);
+                }
+                showCustomDialog('confirmDeleteUserDialog');
+            });
+        }
+        
+        const confirmDeleteUserBtn = document.getElementById('confirmDeleteUserBtn');
+        if (confirmDeleteUserBtn) {
+            confirmDeleteUserBtn.addEventListener('click', function() {
+                const userId = this.getAttribute('data-user-id');
+                if (!userId) {
+                    closeCustomDialog('confirmDeleteUserDialog');
+                    showMessage('Ошибка', 'Пользователь не выбран', 'error');
+                    return;
+                }
+                
+                const csrftoken = getCookie('csrftoken');
+                
+                const formData = new FormData();
+                formData.append('user_id', userId);
+                
+                closeCustomDialog('confirmDeleteUserDialog');
+                
+                fetch('{% url "delete_user" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage('Успешно', data.message, 'success');
+                        const selectedDeleteUserSpan = document.getElementById('selectedDeleteUser');
+                        const deleteUserBtn = document.getElementById('deleteUserBtn');
+                        if (selectedDeleteUserSpan) selectedDeleteUserSpan.textContent = 'Выберите пользователя';
+                        selectedDeleteUserId = null;
+                        if (deleteUserBtn) deleteUserBtn.disabled = true;
+                        setTimeout(function() {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        showMessage('Ошибка', data.error || 'Неизвестная ошибка', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Ошибка', 'Произошла ошибка при удалении пользователя', 'error');
+                });
+            });
+        }
+        
+        const confirmDeleteUserDialog = document.getElementById('confirmDeleteUserDialog');
+        if (confirmDeleteUserDialog) {
+            confirmDeleteUserDialog.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCustomDialog('confirmDeleteUserDialog');
+                }
+            });
+        }
+        
+        document.addEventListener('click', function(e) {
+            if (dropdownToggle && dropdown && !dropdownToggle.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+                dropdownToggle.classList.remove('active');
+            }
+            if (deleteDropdownToggle && deleteDropdown && !deleteDropdownToggle.contains(e.target) && !deleteDropdown.contains(e.target)) {
+                deleteDropdown.style.display = 'none';
+                deleteDropdownToggle.classList.remove('active');
+            }
+        });
     });
 </script>
 {% endblock %}
@@ -729,11 +944,29 @@
     margin-bottom: 30px;
 }
 
-.assign-curator-section {
+.user-management-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.management-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.management-item {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    max-width: 400px;
+}
+
+.management-label {
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: var(--text-color);
+    margin-bottom: 0;
 }
 
 .dropdown-container {

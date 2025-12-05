@@ -339,3 +339,36 @@ def assign_curator(request):
             return JsonResponse({'success': False, 'error': 'Пользователь не найден'}, status=404)
     
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
+
+
+@login_required
+def delete_user(request):
+    """Удаление пользователя (для админа)"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'error': 'Не указан пользователь'}, status=400)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            
+            if user == request.user:
+                return JsonResponse({'success': False, 'error': 'Нельзя удалить самого себя'}, status=400)
+            
+            username = user.username
+            user.delete()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Пользователь {username} успешно удален'
+            })
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Пользователь не найден'}, status=404)
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
