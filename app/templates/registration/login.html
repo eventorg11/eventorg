@@ -13,6 +13,16 @@
                     <p class="auth-subtitle">Войдите в свой аккаунт для доступа к системе</p>
                 </div>
                 
+                {% if messages %}
+                    <div class="auth-messages">
+                        {% for message in messages %}
+                            <div class="message message-{{ message.tags }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
                 <form method="post" class="auth-form">
                     {% csrf_token %}
                     
@@ -52,7 +62,7 @@
                 </form>
                 
                 <div class="auth-footer">
-                    <p>Нет аккаунта? <a href="#register">Зарегистрируйтесь</a></p>
+                    <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
                 </div>
             </div>
         </div>

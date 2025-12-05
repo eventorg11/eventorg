@@ -1,6 +1,10 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from app.models import Conference
+from app.forms import CustomUserCreationForm, CustomAuthenticationForm
 
 
 def index(request):
@@ -40,3 +44,48 @@ def event_detail(request, event_id):
     """Детализированная страница просмотра мероприятия"""
     conference = get_object_or_404(Conference, id=event_id)
     return render(request, "event_detail.html", {"conference": conference})
+
+
+def register_view(request):
+    """Страница регистрации"""
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Регистрация успешно завершена!')
+            return redirect('index')
+    else:
+        form = CustomUserCreationForm()
+    
+    return render(request, 'registration/register.html', {'form': form})
+
+
+def login_view(request):
+    """Страница входа"""
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    if request.method == 'POST':
+        form = CustomAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f'Добро пожаловать, {user.username}!')
+            next_url = request.GET.get('next', 'index')
+            return redirect(next_url)
+    else:
+        form = CustomAuthenticationForm()
+    
+    return render(request, 'registration/login.html', {'form': form})
+
+
+@login_required
+def logout_view(request):
+    """Выход из системы"""
+    logout(request)
+    messages.success(request, 'Вы успешно вышли из системы.')
+    return redirect('index')
