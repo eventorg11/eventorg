@@ -60,50 +60,40 @@
 <section class="events-section" id="events">
     <div class="container">
         <h2 class="section-title">Предстоящие мероприятия</h2>
-        <div class="events-grid">
-            <div class="event-card">
-                <div class="event-date">
-                    <span class="date-day">15</span>
-                    <span class="date-month">Март</span>
-                </div>
-                <div class="event-info">
-                    <h3>Международная научная конференция</h3>
-                    <p class="event-location">📍 Москва, ул. Примерная, д. 1</p>
-                    <p class="event-description">
-                        Конференция по актуальным вопросам современной науки и образования
-                    </p>
-                    <a href="#" class="btn btn-outline">Подробнее</a>
-                </div>
+        {% if upcoming_conferences %}
+            <div class="events-grid">
+                {% for conference in upcoming_conferences %}
+                    <div class="event-card">
+                        <div class="event-date">
+                            <span class="date-day">{{ conference.start_date|date:"d" }}</span>
+                            <span class="date-month">{{ conference.start_date|date:"M"|upper }}</span>
+                        </div>
+                        <div class="event-info">
+                            <h3>{{ conference.title }}</h3>
+                            <p class="event-location">
+                                {% if conference.is_online %}
+                                    📍 Онлайн
+                                {% else %}
+                                    📍 {{ conference.location }}
+                                {% endif %}
+                            </p>
+                            <p class="event-description">
+                                {% if conference.short_description %}
+                                    {{ conference.short_description|truncatewords:15 }}
+                                {% else %}
+                                    {{ conference.description|truncatewords:15 }}
+                                {% endif %}
+                            </p>
+                            <a href="{% url 'event_detail' event_id=conference.id %}" class="btn btn-outline">Подробнее</a>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-            <div class="event-card">
-                <div class="event-date">
-                    <span class="date-day">20</span>
-                    <span class="date-month">Апрель</span>
-                </div>
-                <div class="event-info">
-                    <h3>Семинар по инновациям</h3>
-                    <p class="event-location">📍 Онлайн</p>
-                    <p class="event-description">
-                        Обсуждение инновационных подходов в образовании и науке
-                    </p>
-                    <a href="#" class="btn btn-outline">Подробнее</a>
-                </div>
+        {% else %}
+            <div class="no-events">
+                <p class="no-events-message">На данный момент нет предстоящих мероприятий.</p>
             </div>
-            <div class="event-card">
-                <div class="event-date">
-                    <span class="date-day">10</span>
-                    <span class="date-month">Май</span>
-                </div>
-                <div class="event-info">
-                    <h3>Молодежная научная конференция</h3>
-                    <p class="event-location">📍 Москва, ул. Примерная, д. 1</p>
-                    <p class="event-description">
-                        Площадка для молодых исследователей и студентов
-                    </p>
-                    <a href="#" class="btn btn-outline">Подробнее</a>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </section>
 

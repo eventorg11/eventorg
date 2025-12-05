@@ -1,9 +1,24 @@
 from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
 from app.models import Conference
 
 
 def index(request):
-    return render(request, "index.html")
+    """Главная страница с ближайшими мероприятиями"""
+    now = timezone.now()
+    
+    upcoming_conferences = Conference.objects.filter(
+        start_date__gte=now
+    ).order_by('start_date')[:2]
+    
+    if upcoming_conferences.count() < 2:
+        additional_needed = 2 - upcoming_conferences.count()
+        additional = Conference.objects.filter(
+            start_date__lt=now
+        ).order_by('-start_date')[:additional_needed]
+        upcoming_conferences = list(upcoming_conferences) + list(additional)
+    
+    return render(request, "index.html", {"upcoming_conferences": upcoming_conferences})
 
 
 def about(request):
