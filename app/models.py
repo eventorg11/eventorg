@@ -1,6 +1,72 @@
 from django.db import models
 from django.utils import timezone
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
+class UserProfile(models.Model):
+    """Профиль пользователя с ролью"""
+    
+    ROLE_CHOICES = [
+        ('student', 'Студент'),
+        ('curator', 'Куратор'),
+        ('admin', 'Администратор'),
+    ]
+    
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile',
+        verbose_name='Пользователь'
+    )
+    
+    role = models.CharField(
+        max_length=20,
+        choices=ROLE_CHOICES,
+        default='student',
+        verbose_name='Роль',
+        help_text='Роль пользователя в системе'
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания'
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Дата обновления'
+    )
+    
+    class Meta:
+        verbose_name = 'Профиль пользователя'
+        verbose_name_plural = 'Профили пользователей'
+        indexes = [
+            models.Index(fields=['role']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_role_display()}"
+    
+    def is_student(self):
+        """Проверяет, является ли пользователь студентом"""
+        return self.role == 'student'
+    
+    def is_curator(self):
+        """Проверяет, является ли пользователь куратором"""
+        return self.role == 'curator'
+    
+    def is_admin(self):
+        """Проверяет, является ли пользователь администратором"""
+        return self.role == 'admin'
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_user_profile(sender, instance, created, **kwargs):
+    """Автоматически создает профиль при создании пользователя"""
+    if created:
+        UserProfile.objects.get_or_create(user=instance, defaults={'role': 'student'})
 
 
 class Conference(models.Model):
