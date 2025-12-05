@@ -113,6 +113,37 @@
         </div>
     </div>
 </div>
+
+<div class="custom-dialog" id="confirmCancelDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title">Подтверждение отмены</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('confirmCancelDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="confirmCancelMessage"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary" onclick="closeCustomDialog('confirmCancelDialog')">Отмена</button>
+            <button class="btn btn-danger" id="confirmCancelBtn">Отменить регистрацию</button>
+        </div>
+    </div>
+</div>
+
+<div class="custom-dialog" id="messageDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title" id="messageDialogTitle">Сообщение</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('messageDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="messageDialogMessage"></p>
+        </div>
+        <div class="custom-dialog-footer single-button">
+            <button class="btn btn-primary" onclick="closeCustomDialog('messageDialog')">OK</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -132,23 +163,54 @@
         return cookieValue;
     }
     
+    function showCustomDialog(dialogId) {
+        document.getElementById(dialogId).classList.add('active');
+    }
+    
+    function closeCustomDialog(dialogId) {
+        document.getElementById(dialogId).classList.remove('active');
+    }
+    
+    function showMessage(title, message, type) {
+        const titleEl = document.getElementById('messageDialogTitle');
+        const messageEl = document.getElementById('messageDialogMessage');
+        
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        
+        showCustomDialog('messageDialog');
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         const cancelButtons = document.querySelectorAll('.cancel-registration-btn');
+        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+        let currentRegistrationId = null;
+        let currentButton = null;
         
         cancelButtons.forEach(function(button) {
             button.addEventListener('click', function() {
                 const registrationId = this.getAttribute('data-registration-id');
                 const conferenceTitle = this.getAttribute('data-conference-title');
                 
-                if (!confirm('Вы уверены, что хотите отменить регистрацию на мероприятие "' + conferenceTitle + '"?')) {
-                    return;
-                }
+                currentRegistrationId = registrationId;
+                currentButton = this;
                 
-                const url = '/profile/cancel-registration/' + registrationId + '/';
+                document.getElementById('confirmCancelMessage').textContent = 
+                    'Вы уверены, что хотите отменить регистрацию на мероприятие "' + conferenceTitle + '"?';
+                showCustomDialog('confirmCancelDialog');
+            });
+        });
+        
+        if (confirmCancelBtn) {
+            confirmCancelBtn.addEventListener('click', function() {
+                if (!currentRegistrationId) return;
+                
+                const url = '/profile/cancel-registration/' + currentRegistrationId + '/';
                 const csrftoken = getCookie('csrftoken');
                 
-                button.disabled = true;
-                button.textContent = 'Отмена...';
+                closeCustomDialog('confirmCancelDialog');
+                currentButton.disabled = true;
+                currentButton.textContent = 'Отмена...';
                 
                 fetch(url, {
                     method: 'POST',
@@ -160,22 +222,43 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(data.message || 'Регистрация успешно отменена');
-                        window.location.reload();
+                        showMessage('Успешно', data.message || 'Регистрация успешно отменена', 'success');
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 1500);
                     } else {
-                        alert(data.error || 'Произошла ошибка при отмене регистрации');
-                        button.disabled = false;
-                        button.textContent = 'Отменить регистрацию';
+                        showMessage('Ошибка', data.error || 'Произошла ошибка при отмене регистрации', 'error');
+                        currentButton.disabled = false;
+                        currentButton.textContent = 'Отменить регистрацию';
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Произошла ошибка при отмене регистрации');
-                    button.disabled = false;
-                    button.textContent = 'Отменить регистрацию';
+                    showMessage('Ошибка', 'Произошла ошибка при отмене регистрации', 'error');
+                    currentButton.disabled = false;
+                    currentButton.textContent = 'Отменить регистрацию';
                 });
             });
-        });
+        }
+        
+        const confirmCancelDialog = document.getElementById('confirmCancelDialog');
+        const messageDialogEl = document.getElementById('messageDialog');
+        
+        if (confirmCancelDialog) {
+            confirmCancelDialog.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCustomDialog('confirmCancelDialog');
+                }
+            });
+        }
+        
+        if (messageDialogEl) {
+            messageDialogEl.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCustomDialog('messageDialog');
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
@@ -508,4 +591,5 @@
 }
 </style>
 {% endblock %}
+
 

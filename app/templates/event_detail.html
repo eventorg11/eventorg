@@ -193,10 +193,44 @@
     </div>
 </div>
 {% endif %}
+
+<div class="custom-dialog" id="messageDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title" id="messageDialogTitle">Сообщение</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('messageDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="messageDialogMessage"></p>
+        </div>
+        <div class="custom-dialog-footer single-button">
+            <button class="btn btn-primary" onclick="closeCustomDialog('messageDialog')">OK</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    function showCustomDialog(dialogId) {
+        document.getElementById(dialogId).classList.add('active');
+    }
+    
+    function closeCustomDialog(dialogId) {
+        document.getElementById(dialogId).classList.remove('active');
+    }
+    
+    function showMessage(title, message, type) {
+        const titleEl = document.getElementById('messageDialogTitle');
+        const messageEl = document.getElementById('messageDialogMessage');
+        
+        titleEl.textContent = title;
+        messageEl.textContent = message;
+        
+        showCustomDialog('messageDialog');
+    }
+    
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -251,17 +285,19 @@
                     .then(data => {
                         if (data.success) {
                             closeModalFunc();
-                            alert(data.message || 'Вы успешно зарегистрированы на мероприятие');
-                            window.location.reload();
+                            showMessage('Успешно', data.message || 'Вы успешно зарегистрированы на мероприятие', 'success');
+                            setTimeout(function() {
+                                window.location.reload();
+                            }, 1500);
                         } else {
-                            alert(data.error || 'Произошла ошибка при регистрации');
+                            showMessage('Ошибка', data.error || 'Произошла ошибка при регистрации', 'error');
                             confirmBtn.disabled = false;
                             confirmBtn.textContent = 'Зарегистрироваться';
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        alert('Произошла ошибка при регистрации');
+                        showMessage('Ошибка', 'Произошла ошибка при регистрации', 'error');
                         confirmBtn.disabled = false;
                         confirmBtn.textContent = 'Зарегистрироваться';
                     });
@@ -276,6 +312,12 @@
                 });
             }
         }
+        
+        document.getElementById('messageDialog').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCustomDialog('messageDialog');
+            }
+        });
     });
 </script>
 {% endblock %}

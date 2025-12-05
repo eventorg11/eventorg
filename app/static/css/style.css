@@ -1893,3 +1893,135 @@ body {
     }
 }
 
+/* Custom Dialog Styles */
+.custom-dialog {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+}
+
+.custom-dialog.active {
+    display: flex;
+}
+
+.custom-dialog-content {
+    background-color: var(--bg-white);
+    border-radius: 15px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: modalSlideIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+.custom-dialog-header {
+    padding: 25px 30px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-dialog-title {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.custom-dialog-close {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.custom-dialog-close:hover {
+    color: var(--primary-color);
+}
+
+.custom-dialog-body {
+    padding: 30px;
+}
+
+.custom-dialog-message {
+    color: var(--text-color);
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.custom-dialog-footer {
+    padding: 20px 30px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+}
+
+.custom-dialog-footer .btn {
+    min-width: 100px;
+}
+
+.custom-dialog-footer.single-button {
+    justify-content: center;
+}
+
+.custom-dialog-icon {
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.custom-dialog-icon.success {
+    color: #28a745;
+}
+
+.custom-dialog-icon.error {
+    color: var(--accent-color);
+}
+
+.custom-dialog-icon.warning {
+    color: #ffc107;
+}
+
+@media (max-width: 768px) {
+    .custom-dialog-content {
+        width: 95%;
+        max-width: none;
+    }
+
+    .custom-dialog-header,
+    .custom-dialog-body,
+    .custom-dialog-footer {
+        padding: 20px;
+    }
+
+    .custom-dialog-title {
+        font-size: 1.1rem;
+    }
+
+    .custom-dialog-footer {
+        flex-direction: column;
+    }
+
+    .custom-dialog-footer .btn {
+        width: 100%;
+    }
+}
+
