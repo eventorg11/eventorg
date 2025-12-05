@@ -1499,3 +1499,131 @@ body {
     }
 }
 
+/* Auth Pages Styles */
+.auth-section {
+    padding: 80px 0;
+    background-color: var(--bg-light);
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+}
+
+.auth-container {
+    max-width: 500px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.auth-card {
+    background-color: var(--bg-white);
+    padding: 50px 40px;
+    border-radius: 15px;
+    box-shadow: var(--shadow-hover);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.auth-title {
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.auth-subtitle {
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    color: var(--primary-color);
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    padding: 12px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s;
+    background-color: var(--bg-white);
+    color: var(--text-color);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--secondary-color);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.btn-auth {
+    width: 100%;
+    padding: 14px;
+    font-size: 1.1rem;
+    margin-top: 10px;
+}
+
+.auth-footer {
+    margin-top: 30px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-footer p {
+    color: var(--text-light);
+    margin: 0;
+}
+
+.auth-footer a {
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+.auth-footer a:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .auth-section {
+        padding: 40px 20px;
+    }
+
+    .auth-card {
+        padding: 40px 30px;
+    }
+
+    .auth-title {
+        font-size: 1.5rem;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
