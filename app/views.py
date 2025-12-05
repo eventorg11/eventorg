@@ -87,6 +87,11 @@ def contact(request):
     return render(request, "contact.html")
 
 
+def faq(request):
+    """Страница часто задаваемых вопросов"""
+    return render(request, "faq.html")
+
+
 def event_detail(request, event_id):
     """Детализированная страница просмотра мероприятия"""
     conference = get_object_or_404(Conference, id=event_id)
