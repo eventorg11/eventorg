@@ -16,21 +16,43 @@
                 <form method="post" class="auth-form">
                     {% csrf_token %}
                     
+                    {% if form.non_field_errors %}
+                        <div class="form-errors">
+                            {% for error in form.non_field_errors %}
+                                <div class="error-message">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
                     <div class="form-group">
-                        <label for="username">Имя пользователя</label>
-                        <input type="text" id="username" name="username" class="form-control" placeholder="Введите имя пользователя" required>
+                        <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="field-errors">
+                                {% for error in form.username.errors %}
+                                    <span class="error-text">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <div class="form-group">
-                        <label for="password">Пароль</label>
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Введите пароль" required>
+                        <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                            <div class="field-errors">
+                                {% for error in form.password.errors %}
+                                    <span class="error-text">{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-auth">Войти</button>
                 </form>
                 
                 <div class="auth-footer">
-                    <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+                    <p>Нет аккаунта? <a href="#register">Зарегистрируйтесь</a></p>
                 </div>
             </div>
         </div>
