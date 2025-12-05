@@ -581,3 +581,18 @@ def delete_message(request, message_id):
             return JsonResponse({'success': False, 'error': 'Сообщение не найдено'}, status=404)
     
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
+
+
+def participation_rules(request):
+    """Страница правил участия"""
+    return render(request, "participation_rules.html")
+
+
+def archive(request):
+    """Страница архива мероприятий"""
+    completed_conferences = Conference.objects.filter(status='completed').order_by('-start_date')
+    
+    context = {
+        'completed_conferences': completed_conferences,
+    }
+    return render(request, "archive.html", context)

@@ -20,11 +20,25 @@
                 </div>
                 <nav class="main-nav">
                     <ul>
-                        <li><a href="{% url 'about' %}">О нас</a></li>
-                        <li><a href="{% url 'events' %}">Мероприятия</a></li>
-                        <li><a href="{% url 'faq' %}">FAQ</a></li>
-                        <li><a href="{% url 'feedback' %}">Обратная связь</a></li>
-                        <li><a href="{% url 'contact' %}">Контакты</a></li>
+                        <li class="nav-dropdown-container">
+                            <a href="{% url 'about' %}" class="nav-link">О нас</a>
+                            <ul class="nav-dropdown">
+                                <li><a href="{% url 'participation_rules' %}">Правила участия</a></li>
+                                <li><a href="{% url 'faq' %}">FAQ</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-dropdown-container">
+                            <a href="{% url 'events' %}" class="nav-link">Мероприятия</a>
+                            <ul class="nav-dropdown">
+                                <li><a href="{% url 'archive' %}">Архив</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-dropdown-container">
+                            <a href="{% url 'contact' %}" class="nav-link">Контакты</a>
+                            <ul class="nav-dropdown">
+                                <li><a href="{% url 'feedback' %}">Обратная связь</a></li>
+                            </ul>
+                        </li>
                         {% if user.is_authenticated %}
                             <li class="user-menu-container">
                                 <a href="#" class="user-name">{{ user.username }} ▼</a>
@@ -62,6 +76,8 @@
                     <ul>
                         <li><a href="{% url 'index' %}">Главная</a></li>
                         <li><a href="{% url 'about' %}">О нас</a></li>
+                        <li><a href="{% url 'archive' %}">Архив</a></li>
+                        <li><a href="{% url 'participation_rules' %}">Правила участия</a></li>
                         <li><a href="{% url 'faq' %}">FAQ</a></li>
                         <li><a href="{% url 'contact' %}">Контакты</a></li>
                     </ul>

@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+
+{% block title %}Архив мероприятий - Система организации научной конференции{% endblock %}
+
+{% block breadcrumb %}
+<div class="breadcrumb">
+    <div class="breadcrumb-container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index' %}" class="breadcrumb-link">Главная</a>
+            </li>
+            <li class="breadcrumb-item active">
+                <span>Архив мероприятий</span>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">Архив мероприятий</h1>
+        <p class="page-subtitle">Завершенные конференции и мероприятия</p>
+    </div>
+</div>
+
+<section class="archive-section">
+    <div class="container">
+        {% if completed_conferences %}
+        <div class="archive-stats">
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <h3>Всего завершено</h3>
+                    <p class="stat-number">{{ completed_conferences|length }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="archive-grid">
+            {% for conference in completed_conferences %}
+            <div class="archive-card">
+                <div class="archive-card-header">
+                    <div class="archive-date">
+                        <span class="date-day">{{ conference.start_date|date:"d" }}</span>
+                        <span class="date-month">{{ conference.start_date|date:"M"|upper }}</span>
+                        <span class="date-year">{{ conference.start_date|date:"Y" }}</span>
+                    </div>
+                    <div class="archive-status-badge status-completed">
+                        Завершено
+                    </div>
+                </div>
+                <div class="archive-card-body">
+                    <h3 class="archive-title">{{ conference.title }}</h3>
+                    {% if conference.short_description %}
+                    <p class="archive-description">{{ conference.short_description|truncatewords:30 }}</p>
+                    {% else %}
+                    <p class="archive-description">{{ conference.description|truncatewords:30 }}</p>
+                    {% endif %}
+                    <div class="archive-details">
+                        <div class="archive-detail-item">
+                            <span class="detail-icon">📍</span>
+                            <span class="detail-text">
+                                {% if conference.is_online %}
+                                    Онлайн
+                                {% else %}
+                                    {{ conference.location|default:"Место не указано" }}
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="archive-detail-item">
+                            <span class="detail-icon">👥</span>
+                            <span class="detail-text">
+                                {% if conference.max_participants %}
+                                    До {{ conference.max_participants }} участников
+                                {% else %}
+                                    Без ограничений
+                                {% endif %}
+                            </span>
+                        </div>
+                        {% if conference.organizer_name %}
+                        <div class="archive-detail-item">
+                            <span class="detail-icon">🏢</span>
+                            <span class="detail-text">{{ conference.organizer_name }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="archive-card-footer">
+                    <a href="{% url 'event_detail' event_id=conference.id %}" class="btn btn-outline">Подробнее</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-archive">
+            <div class="no-archive-icon">📭</div>
+            <h2>Архив пуст</h2>
+            <p>На данный момент нет завершенных мероприятий.</p>
+            <a href="{% url 'events' %}" class="btn btn-primary">Посмотреть текущие мероприятия</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
