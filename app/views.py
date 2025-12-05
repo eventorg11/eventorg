@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import IntegrityError
+from django.conf import settings
 from app.models import Conference, EventRegistration
 from app.forms import CustomUserCreationForm, CustomAuthenticationForm
 
@@ -54,6 +55,12 @@ def event_detail(request, event_id):
     context = {
         'conference': conference,
         'is_registered': is_registered,
+        'debug_info': {
+            'status': conference.status,
+            'registration_deadline': conference.registration_deadline,
+            'now': timezone.now(),
+            'is_registration_open': conference.is_registration_open,
+        } if settings.DEBUG else None,
     }
     return render(request, "event_detail.html", context)
 
@@ -64,7 +71,7 @@ def register_for_event(request, event_id):
     conference = get_object_or_404(Conference, id=event_id)
     
     if request.method == 'POST':
-        if not conference.is_registration_open():
+        if not conference.is_registration_open:
             return JsonResponse({'success': False, 'error': 'Регистрация на это мероприятие закрыта'}, status=400)
         
         if conference.max_participants:

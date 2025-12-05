@@ -186,14 +186,25 @@ class Conference(models.Model):
     def __str__(self):
         return self.title
     
+    @property
     def is_registration_open(self):
         """Проверяет, открыта ли регистрация"""
+        if self.status != 'not_started':
+            return False
+        
         if not self.registration_deadline:
-            return self.status == 'not_started'
-        return (
-            self.status == 'not_started' and 
-            timezone.now() <= self.registration_deadline
-        )
+            return True
+        
+        now = timezone.now()
+        deadline = self.registration_deadline
+        
+        if timezone.is_naive(deadline):
+            default_tz = timezone.get_current_timezone()
+            deadline = timezone.make_aware(deadline, default_tz)
+        elif timezone.is_aware(deadline):
+            deadline = timezone.localtime(deadline)
+        
+        return now <= deadline
     
     def is_upcoming(self):
         """Проверяет, является ли конференция предстоящей"""

@@ -134,6 +134,18 @@
                     </div>
                 </div>
 
+                {% if debug_info %}
+                <div class="sidebar-card" style="background: #f8f9fa; margin-top: 20px;">
+                    <h3 class="sidebar-title">Debug Info</h3>
+                    <div style="font-size: 0.9rem; color: #666;">
+                        <p><strong>Status:</strong> {{ debug_info.status }}</p>
+                        <p><strong>Deadline:</strong> {{ debug_info.registration_deadline|date:"Y-m-d H:i:s" }}</p>
+                        <p><strong>Now:</strong> {{ debug_info.now|date:"Y-m-d H:i:s" }}</p>
+                        <p><strong>Is Open:</strong> {{ debug_info.is_registration_open }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if conference.is_registration_open %}
                 <div class="sidebar-card registration-card">
                     <h3 class="sidebar-title">Регистрация</h3>
@@ -148,6 +160,11 @@
                         <p class="registration-text">Войдите в аккаунт для регистрации</p>
                         <a href="{% url 'login' %}?next={% url 'event_detail' event_id=conference.id %}" class="btn btn-primary btn-large">Войти</a>
                     {% endif %}
+                </div>
+                {% else %}
+                <div class="sidebar-card" style="background: #f8f9fa;">
+                    <h3 class="sidebar-title">Регистрация</h3>
+                    <p class="registration-text" style="color: #666;">Регистрация закрыта</p>
                 </div>
                 {% endif %}
             </div>
