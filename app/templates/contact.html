@@ -14,77 +14,55 @@
 <div class="contact-section">
     <div class="container">
         <div class="contact-content">
-            <div class="contact-info-section">
-                <div class="contact-info-card">
-                    <h2 class="section-subtitle">Контактная информация</h2>
-                    <div class="contact-details">
-                        <div class="contact-detail-item">
-                            <div class="contact-icon">📍</div>
-                            <div class="contact-detail-content">
-                                <h3>Адрес</h3>
-                                <p>2-й Кожуховский проезд, д. 12, стр. 1<br>Москва, 115432, Россия</p>
+            <div class="contact-info-card">
+                <div class="contact-info-grid">
+                    <div class="contact-info-section">
+                        <h2 class="section-subtitle">Контактная информация</h2>
+                        <div class="contact-details">
+                            <div class="contact-detail-item">
+                                <div class="contact-icon">📍</div>
+                                <div class="contact-detail-content">
+                                    <h3>Адрес</h3>
+                                    <p>2-й Кожуховский проезд, д. 12, стр. 1<br>Москва, 115432, Россия</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="contact-detail-item">
-                            <div class="contact-icon">📧</div>
-                            <div class="contact-detail-content">
-                                <h3>Email</h3>
-                                <p><a href="mailto:info@muiv.ru">info@muiv.ru</a></p>
+                            <div class="contact-detail-item">
+                                <div class="contact-icon">📧</div>
+                                <div class="contact-detail-content">
+                                    <h3>Email</h3>
+                                    <p><a href="mailto:info@muiv.ru">info@muiv.ru</a></p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="contact-detail-item">
-                            <div class="contact-icon">📞</div>
-                            <div class="contact-detail-content">
-                                <h3>Телефон</h3>
-                                <p><a href="tel:+74951234567">+7 (495) 123-45-67</a></p>
+                            <div class="contact-detail-item">
+                                <div class="contact-icon">📞</div>
+                                <div class="contact-detail-content">
+                                    <h3>Телефон</h3>
+                                    <p><a href="tel:+74951234567">+7 (495) 123-45-67</a></p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="contact-detail-item">
-                            <div class="contact-icon">🕐</div>
-                            <div class="contact-detail-content">
-                                <h3>Режим работы</h3>
-                                <p>Понедельник - Пятница: 9:00 - 18:00<br>Суббота - Воскресенье: Выходной</p>
+                            <div class="contact-detail-item">
+                                <div class="contact-icon">🕐</div>
+                                <div class="contact-detail-content">
+                                    <h3>Режим работы</h3>
+                                    <p>Понедельник - Пятница: 9:00 - 18:00<br>Суббота - Воскресенье: Выходной</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="contact-form-card">
-                    <h2 class="section-subtitle">Отправить сообщение</h2>
-                    <form class="contact-form" method="post" action="#">
-                        {% csrf_token %}
-                        <div class="form-group">
-                            <label for="name">Ваше имя</label>
-                            <input type="text" id="name" name="name" required>
+                    <div class="map-section">
+                        <h2 class="section-subtitle">Как нас найти</h2>
+                        <div class="map-container">
+                            <iframe 
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15120.641118896838!2d37.65627018573483!3d55.71164274250781!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x414ab4caf9faf987%3A0xbfd80e63b2dea40f!2s2-Y%20Kozhukhovskiy%20Proyezd%2C%20Moskva%2C%20Russia!5e0!3m2!1sen!2saz!4v1764412880585!5m2!1sen!2saz" 
+                                style="border:0;" 
+                                allowfullscreen="" 
+                                loading="lazy" 
+                                referrerpolicy="no-referrer-when-downgrade"
+                                class="google-map">
+                            </iframe>
                         </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject">Тема</label>
-                            <input type="text" id="subject" name="subject" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Сообщение</label>
-                            <textarea id="message" name="message" rows="5" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Отправить сообщение</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="map-section">
-                <h2 class="section-subtitle">Как нас найти</h2>
-                <div class="map-container">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15120.641118896838!2d37.65627018573483!3d55.71164274250781!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x414ab4caf9faf987%3A0xbfd80e63b2dea40f!2s2-Y%20Kozhukhovskiy%20Proyezd%2C%20Moskva%2C%20Russia!5e0!3m2!1sen!2saz!4v1764412880585!5m2!1sen!2saz" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy" 
-                        referrerpolicy="no-referrer-when-downgrade"
-                        class="google-map">
-                    </iframe>
+                    </div>
                 </div>
             </div>
         </div>

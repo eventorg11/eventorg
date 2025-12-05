@@ -951,16 +951,19 @@ body {
 }
 
 .contact-content {
+    max-width: 1200px;
+    margin: 40px auto 0;
+}
+
+.contact-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
-    margin-top: 40px;
 }
 
 .contact-info-section {
     display: flex;
     flex-direction: column;
-    gap: 30px;
 }
 
 .contact-info-card,
@@ -1068,6 +1071,10 @@ body {
     flex-direction: column;
 }
 
+.map-section .section-subtitle {
+    margin-bottom: 20px;
+}
+
 .map-container {
     width: 100%;
     height: 500px;
@@ -1084,8 +1091,9 @@ body {
 }
 
 @media (max-width: 968px) {
-    .contact-content {
+    .contact-info-grid {
         grid-template-columns: 1fr;
+        gap: 30px;
     }
 
     .map-container {
