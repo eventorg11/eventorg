@@ -121,3 +121,16 @@ def logout_view(request):
     """Выход из системы"""
     logout(request)
     return redirect('index')
+
+
+@login_required
+def profile_view(request):
+    """Страница личного кабинета пользователя"""
+    registrations = EventRegistration.objects.filter(
+        user=request.user
+    ).select_related('conference').order_by('-created_at')
+    
+    context = {
+        'registrations': registrations,
+    }
+    return render(request, 'profile.html', context)
