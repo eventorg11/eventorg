@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Мероприятия - Система организации научной конференции{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="page-title">Мероприятия</h1>
+        <p class="page-subtitle">Все предстоящие и прошедшие конференции</p>
+    </div>
+</div>
+
+<div class="events-section">
+    <div class="container">
+        {% if conferences %}
+            <div class="events-grid">
+                {% for conference in conferences %}
+                    <div class="conference-card">
+                        <div class="conference-header">
+                            <div class="conference-date">
+                                <span class="date-day">{{ conference.start_date|date:"d" }}</span>
+                                <span class="date-month">{{ conference.start_date|date:"M"|upper }}</span>
+                                <span class="date-year">{{ conference.start_date|date:"Y" }}</span>
+                            </div>
+                            <div class="conference-status status-{{ conference.status }}">
+                                <span>{{ conference.get_status_display }}</span>
+                            </div>
+                        </div>
+                        <div class="conference-body">
+                            <h3 class="conference-title">{{ conference.title }}</h3>
+                            {% if conference.short_description %}
+                                <p class="conference-short-desc">{{ conference.short_description }}</p>
+                            {% else %}
+                                <p class="conference-short-desc">{{ conference.description|truncatewords:20 }}</p>
+                            {% endif %}
+                            <div class="conference-details">
+                                <div class="detail-item">
+                                    <span class="detail-icon">📍</span>
+                                    <span class="detail-text">
+                                        {% if conference.is_online %}
+                                            Онлайн
+                                        {% else %}
+                                            {{ conference.location }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon">🕐</span>
+                                    <span class="detail-text">
+                                        {{ conference.start_date|date:"H:i" }} - {{ conference.end_date|date:"H:i" }}
+                                    </span>
+                                </div>
+                                {% if conference.organizer_name %}
+                                <div class="detail-item">
+                                    <span class="detail-icon">👤</span>
+                                    <span class="detail-text">{{ conference.organizer_name }}</span>
+                                </div>
+                                {% endif %}
+                                {% if conference.max_participants %}
+                                <div class="detail-item">
+                                    <span class="detail-icon">👥</span>
+                                    <span class="detail-text">До {{ conference.max_participants }} участников</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% if conference.is_online and conference.online_link %}
+                            <div class="conference-online">
+                                <a href="{{ conference.online_link }}" target="_blank" class="online-link">
+                                    🔗 Присоединиться онлайн
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if conference.registration_deadline and conference.is_registration_open %}
+                            <div class="conference-registration">
+                                <p class="registration-info">
+                                    Регистрация до: {{ conference.registration_deadline|date:"d.m.Y H:i" }}
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-events">
+                <p class="no-events-message">На данный момент нет запланированных мероприятий.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
