@@ -137,13 +137,132 @@
                 {% if conference.is_registration_open %}
                 <div class="sidebar-card registration-card">
                     <h3 class="sidebar-title">Регистрация</h3>
-                    <p class="registration-text">Регистрация на это мероприятие открыта</p>
-                    <button class="btn btn-primary btn-large">Зарегистрироваться</button>
+                    {% if user.is_authenticated %}
+                        {% if is_registered %}
+                            <p class="registration-text">Вы уже зарегистрированы на это мероприятие</p>
+                        {% else %}
+                            <p class="registration-text">Регистрация на это мероприятие открыта</p>
+                            <button class="btn btn-primary btn-large" id="registerBtn">Зарегистрироваться</button>
+                        {% endif %}
+                    {% else %}
+                        <p class="registration-text">Войдите в аккаунт для регистрации</p>
+                        <a href="{% url 'login' %}?next={% url 'event_detail' event_id=conference.id %}" class="btn btn-primary btn-large">Войти</a>
+                    {% endif %}
                 </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+
+{% if user.is_authenticated and not is_registered %}
+<div class="modal-overlay" id="registrationModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Подтверждение регистрации</h2>
+            <button class="modal-close" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-event-info">
+                <div class="modal-info-item">
+                    <span class="modal-info-label">📍 Место проведения:</span>
+                    <span class="modal-info-value">
+                        {% if conference.is_online %}
+                            Онлайн
+                        {% else %}
+                            {{ conference.location }}
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="modal-info-item">
+                    <span class="modal-info-label">📅 Дата и время:</span>
+                    <span class="modal-info-value">{{ conference.start_date|date:"d.m.Y H:i" }}</span>
+                </div>
+            </div>
+            <p class="modal-question">Вы хотите зарегистрироваться?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelBtn">Отмена</button>
+            <button class="btn btn-primary" id="confirmRegisterBtn">Зарегистрироваться</button>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const registerBtn = document.getElementById('registerBtn');
+        const modal = document.getElementById('registrationModal');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const confirmBtn = document.getElementById('confirmRegisterBtn');
+        
+        if (registerBtn && modal) {
+            registerBtn.addEventListener('click', function() {
+                modal.classList.add('active');
+            });
+            
+            function closeModalFunc() {
+                modal.classList.remove('active');
+            }
+            
+            if (closeModal) closeModal.addEventListener('click', closeModalFunc);
+            if (cancelBtn) cancelBtn.addEventListener('click', closeModalFunc);
+            
+            if (confirmBtn) {
+                confirmBtn.addEventListener('click', function() {
+                    const eventId = '{{ conference.id }}';
+                    const url = '/events/' + eventId + '/register/';
+                    const csrftoken = getCookie('csrftoken');
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrftoken,
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert(data.error || 'Произошла ошибка при регистрации');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Произошла ошибка при регистрации');
+                    });
+                });
+            }
+            
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closeModalFunc();
+                    }
+                });
+            }
+        }
+    });
+</script>
 {% endblock %}
 

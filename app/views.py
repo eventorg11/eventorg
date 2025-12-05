@@ -2,7 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from app.models import Conference
+from django.http import JsonResponse
+from django.db import IntegrityError
+from app.models import Conference, EventRegistration
 from app.forms import CustomUserCreationForm, CustomAuthenticationForm
 
 
@@ -42,7 +44,41 @@ def contact(request):
 def event_detail(request, event_id):
     """Детализированная страница просмотра мероприятия"""
     conference = get_object_or_404(Conference, id=event_id)
-    return render(request, "event_detail.html", {"conference": conference})
+    is_registered = False
+    if request.user.is_authenticated:
+        is_registered = EventRegistration.objects.filter(
+            user=request.user,
+            conference=conference
+        ).exists()
+    
+    context = {
+        'conference': conference,
+        'is_registered': is_registered,
+    }
+    return render(request, "event_detail.html", context)
+
+
+@login_required
+def register_for_event(request, event_id):
+    """Регистрация пользователя на мероприятие"""
+    conference = get_object_or_404(Conference, id=event_id)
+    
+    if request.method == 'POST':
+        if not conference.is_registration_open():
+            return JsonResponse({'success': False, 'error': 'Регистрация на это мероприятие закрыта'}, status=400)
+        
+        if conference.max_participants:
+            current_registrations = EventRegistration.objects.filter(conference=conference).count()
+            if current_registrations >= conference.max_participants:
+                return JsonResponse({'success': False, 'error': 'Достигнуто максимальное количество участников'}, status=400)
+        
+        try:
+            EventRegistration.objects.create(user=request.user, conference=conference)
+            return JsonResponse({'success': True, 'message': 'Вы успешно зарегистрированы на мероприятие'})
+        except IntegrityError:
+            return JsonResponse({'success': False, 'error': 'Вы уже зарегистрированы на это мероприятие'}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=405)
 
 
 def register_view(request):
