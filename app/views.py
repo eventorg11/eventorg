@@ -137,6 +137,12 @@ def profile_view(request):
         curated_conferences = Conference.objects.filter(
             curator=request.user
         ).order_by('-created_at')
+        
+        for conference in curated_conferences:
+            conference.registration_count = EventRegistration.objects.filter(
+                conference=conference
+            ).count()
+        
         context = {
             'is_curator': True,
             'curated_conferences': curated_conferences,
@@ -212,3 +218,29 @@ def settings_view(request):
         'password_success': password_success,
     }
     return render(request, 'settings.html', context)
+
+
+@login_required
+def event_participants_view(request, event_id):
+    """Страница со списком зарегистрированных пользователей на мероприятие"""
+    conference = get_object_or_404(Conference, id=event_id)
+    
+    user_profile = getattr(request.user, 'profile', None)
+    is_curator = user_profile and user_profile.is_curator()
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not (is_curator and conference.curator == request.user) and not is_admin:
+        return redirect('profile')
+    
+    registrations = EventRegistration.objects.filter(
+        conference=conference
+    ).select_related('user').order_by('-created_at')
+    
+    context = {
+        'conference': conference,
+        'registrations': registrations,
+        'registration_count': registrations.count(),
+        'max_participants': conference.max_participants,
+    }
+    
+    return render(request, 'event_participants.html', context)

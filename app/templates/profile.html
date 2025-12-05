@@ -97,9 +97,19 @@
                                     </span>
                                 </div>
                             </div>
+                            <div class="detail-row">
+                                <span class="detail-icon">👥</span>
+                                <div class="detail-content">
+                                    <span class="detail-label">Регистрации</span>
+                                    <span class="detail-value">
+                                        {{ conference.registration_count }}{% if conference.max_participants %}/{{ conference.max_participants }}{% endif %}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <div class="registration-actions">
                             <a href="{% url 'event_detail' event_id=conference.id %}" class="btn btn-secondary btn-sm">Подробнее</a>
+                            <a href="{% url 'event_participants' event_id=conference.id %}" class="btn btn-primary btn-sm">Просмотр участников</a>
                         </div>
                     </div>
                     {% endfor %}
