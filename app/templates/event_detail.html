@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ conference.title }} - Система организации научной конференции{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="event-detail-header">
+            <a href="{% url 'events' %}" class="back-link">← Вернуться к списку мероприятий</a>
+            <h1 class="page-title">{{ conference.title }}</h1>
+            <div class="event-status-badge status-{{ conference.status }}">
+                <span>{{ conference.get_status_display }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="event-detail-section">
+    <div class="container">
+        <div class="event-detail-content">
+            <div class="event-main-info">
+                <div class="event-date-card">
+                    <div class="event-date-large">
+                        <span class="date-day-large">{{ conference.start_date|date:"d" }}</span>
+                        <div class="date-month-year">
+                            <span class="date-month-large">{{ conference.start_date|date:"F"|upper }}</span>
+                            <span class="date-year-large">{{ conference.start_date|date:"Y" }}</span>
+                        </div>
+                    </div>
+                    <div class="event-time">
+                        <span class="time-icon">🕐</span>
+                        <span class="time-text">{{ conference.start_date|date:"H:i" }}</span>
+                    </div>
+                </div>
+
+                <div class="event-description-card">
+                    <h2 class="section-title">Описание</h2>
+                    <div class="event-description">
+                        <p>{{ conference.description|linebreaks }}</p>
+                    </div>
+                </div>
+
+                <div class="event-details-grid">
+                    <div class="detail-card">
+                        <div class="detail-icon-large">📍</div>
+                        <h3 class="detail-title">Место проведения</h3>
+                        <p class="detail-value">
+                            {% if conference.is_online %}
+                                <span class="online-badge">Онлайн</span>
+                            {% else %}
+                                {{ conference.location }}
+                            {% endif %}
+                        </p>
+                        {% if conference.is_online and conference.online_link %}
+                        <a href="{{ conference.online_link }}" target="_blank" class="online-link-btn">
+                            🔗 Присоединиться онлайн
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    {% if conference.organizer_name %}
+                    <div class="detail-card">
+                        <div class="detail-icon-large">👤</div>
+                        <h3 class="detail-title">Организатор</h3>
+                        <p class="detail-value">{{ conference.organizer_name }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if conference.contact_email %}
+                    <div class="detail-card">
+                        <div class="detail-icon-large">📧</div>
+                        <h3 class="detail-title">Контактный email</h3>
+                        <p class="detail-value">
+                            <a href="mailto:{{ conference.contact_email }}">{{ conference.contact_email }}</a>
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    {% if conference.max_participants %}
+                    <div class="detail-card">
+                        <div class="detail-icon-large">👥</div>
+                        <h3 class="detail-title">Максимальное количество участников</h3>
+                        <p class="detail-value">{{ conference.max_participants }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if conference.registration_deadline %}
+                    <div class="detail-card">
+                        <div class="detail-icon-large">📅</div>
+                        <h3 class="detail-title">Срок регистрации</h3>
+                        <p class="detail-value">{{ conference.registration_deadline|date:"d.m.Y H:i" }}</p>
+                        {% if conference.is_registration_open %}
+                        <span class="registration-open">Регистрация открыта</span>
+                        {% else %}
+                        <span class="registration-closed">Регистрация закрыта</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    {% if conference.curator %}
+                    <div class="detail-card">
+                        <div class="detail-icon-large">🎓</div>
+                        <h3 class="detail-title">Куратор</h3>
+                        <p class="detail-value">{{ conference.curator.get_full_name|default:conference.curator.username }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="event-sidebar">
+                <div class="sidebar-card">
+                    <h3 class="sidebar-title">Информация о мероприятии</h3>
+                    <div class="sidebar-info">
+                        <div class="sidebar-info-item">
+                            <span class="sidebar-label">Дата создания:</span>
+                            <span class="sidebar-value">{{ conference.created_at|date:"d.m.Y" }}</span>
+                        </div>
+                        <div class="sidebar-info-item">
+                            <span class="sidebar-label">Последнее обновление:</span>
+                            <span class="sidebar-value">{{ conference.updated_at|date:"d.m.Y H:i" }}</span>
+                        </div>
+                        {% if conference.is_upcoming %}
+                        <div class="sidebar-info-item">
+                            <span class="sidebar-label">Статус:</span>
+                            <span class="sidebar-value upcoming">Предстоящее</span>
+                        </div>
+                        {% elif conference.is_past %}
+                        <div class="sidebar-info-item">
+                            <span class="sidebar-label">Статус:</span>
+                            <span class="sidebar-value past">Прошедшее</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if conference.is_registration_open %}
+                <div class="sidebar-card registration-card">
+                    <h3 class="sidebar-title">Регистрация</h3>
+                    <p class="registration-text">Регистрация на это мероприятие открыта</p>
+                    <button class="btn btn-primary btn-large">Зарегистрироваться</button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

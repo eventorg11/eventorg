@@ -16,6 +16,7 @@
         {% if conferences %}
             <div class="events-grid">
                 {% for conference in conferences %}
+                    <a href="{% url 'event_detail' event_id=conference.id %}" class="conference-card-link">
                     <div class="conference-card">
                         <div class="conference-header">
                             <div class="conference-date">
@@ -80,6 +81,7 @@
                             {% endif %}
                         </div>
                     </div>
+                    </a>
                 {% endfor %}
             </div>
         {% else %}
