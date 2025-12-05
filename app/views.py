@@ -2,10 +2,13 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db import IntegrityError
 from app.models import Conference, EventRegistration, UserProfile
 from django.contrib.auth import get_user_model
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill
+from datetime import datetime
 
 User = get_user_model()
 from app.forms import (
@@ -372,3 +375,67 @@ def delete_user(request):
             return JsonResponse({'success': False, 'error': 'Пользователь не найден'}, status=404)
     
     return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
+
+
+@login_required
+def export_conferences_excel(request):
+    """Экспорт информации о конференциях в Excel файл (только для администраторов)"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    conferences = Conference.objects.all().order_by('start_date')
+    
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Конференции"
+    
+    header_fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF", size=12)
+    
+    headers = ['Название конференции', 'Дата начала', 'Количество зарегистрированных', 'Максимум мест']
+    ws.append(headers)
+    
+    for cell in ws[1]:
+        cell.font = header_font
+        cell.fill = header_fill
+        cell.alignment = Alignment(horizontal='center', vertical='center')
+    
+    for conference in conferences:
+        registration_count = EventRegistration.objects.filter(conference=conference).count()
+        max_participants = conference.max_participants if conference.max_participants else 'Не ограничено'
+        start_date = timezone.localtime(conference.start_date).strftime('%d.%m.%Y %H:%M')
+        
+        ws.append([
+            conference.title,
+            start_date,
+            registration_count,
+            max_participants
+        ])
+    
+    for column in ws.columns:
+        max_length = 0
+        column_letter = column[0].column_letter
+        for cell in column:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        adjusted_width = min(max_length + 2, 50)
+        ws.column_dimensions[column_letter].width = adjusted_width
+    
+    for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        for cell in row:
+            cell.alignment = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f'conferences_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    
+    wb.save(response)
+    return response

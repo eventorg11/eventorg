@@ -19,4 +19,5 @@ urlpatterns = [
     path("profile/create-event/", views.create_event_view, name="create_event"),
     path("profile/assign-curator/", views.assign_curator, name="assign_curator"),
     path("profile/delete-user/", views.delete_user, name="delete_user"),
+    path("profile/export-excel/", views.export_conferences_excel, name="export_excel"),
 ]

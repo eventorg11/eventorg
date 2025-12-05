@@ -58,6 +58,19 @@
             </div>
 
             {% if is_admin %}
+            <div class="registrations-card" style="margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <span style="font-size: 1.5rem;">📊</span>
+                    <div style="flex: 1;">
+                        <h3 style="margin: 0 0 5px 0; color: var(--text-color); font-size: 1.2rem; font-weight: 600;">Экспорт данных</h3>
+                        <p style="margin: 0; color: var(--text-light); font-size: 0.95rem;">Скачайте Excel файл с информацией о всех конференциях</p>
+                    </div>
+                    <a href="{% url 'export_excel' %}" class="btn btn-primary" style="white-space: nowrap;">
+                        📥 Скачать Excel
+                    </a>
+                </div>
+            </div>
+            
             <div class="registrations-card">
                 <h2 class="section-title">
                     <span class="title-icon">👑</span>
