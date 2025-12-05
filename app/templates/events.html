@@ -13,6 +13,55 @@
 
 <div class="events-section">
     <div class="container">
+        <div class="events-filters">
+            <form method="get" action="{% url 'events' %}" class="filters-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="search" class="filter-label">🔍 Поиск</label>
+                        <input type="text" 
+                               id="search" 
+                               name="search" 
+                               class="form-control filter-input" 
+                               placeholder="Название, описание..." 
+                               value="{{ search_query }}">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="status" class="filter-label">📊 Статус</label>
+                        <select id="status" name="status" class="form-control filter-select">
+                            <option value="">Все</option>
+                            <option value="not_started" {% if status_filter == 'not_started' %}selected{% endif %}>Не началась</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Завершена</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="type" class="filter-label">🌐 Тип</label>
+                        <select id="type" name="type" class="form-control filter-select">
+                            <option value="">Все</option>
+                            <option value="online" {% if type_filter == 'online' %}selected{% endif %}>Онлайн</option>
+                            <option value="offline" {% if type_filter == 'offline' %}selected{% endif %}>Офлайн</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="sort" class="filter-label">🔄 Сортировка</label>
+                        <select id="sort" name="sort" class="form-control filter-select">
+                            <option value="-start_date" {% if sort_by == '-start_date' %}selected{% endif %}>Дата (новые)</option>
+                            <option value="start_date" {% if sort_by == 'start_date' %}selected{% endif %}>Дата (старые)</option>
+                            <option value="title" {% if sort_by == 'title' %}selected{% endif %}>Название (А-Я)</option>
+                            <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>Название (Я-А)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">Применить</button>
+                        <a href="{% url 'events' %}" class="btn btn-secondary">Сбросить</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
         {% if conferences %}
             <div class="events-grid">
                 {% for conference in conferences %}
@@ -89,7 +138,13 @@
             </div>
         {% else %}
             <div class="no-events">
-                <p class="no-events-message">На данный момент нет запланированных мероприятий.</p>
+                <p class="no-events-message">
+                    {% if search_query or status_filter or type_filter %}
+                        По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска.
+                    {% else %}
+                        На данный момент нет запланированных мероприятий.
+                    {% endif %}
+                </p>
             </div>
         {% endif %}
     </div>

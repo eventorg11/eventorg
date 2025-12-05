@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
-from django.db import IntegrityError
+from django.db import IntegrityError, models
 from app.models import Conference, EventRegistration, UserProfile
 from django.contrib.auth import get_user_model
 from openpyxl import Workbook
@@ -42,9 +42,44 @@ def about(request):
 
 
 def events(request):
-    """Страница со списком всех мероприятий"""
-    conferences = Conference.objects.all().order_by("-start_date")
-    return render(request, "events.html", {"conferences": conferences})
+    """Страница со списком всех мероприятий с поиском и фильтрами"""
+    conferences = Conference.objects.all()
+    
+    search_query = request.GET.get('search', '').strip()
+    status_filter = request.GET.get('status', '')
+    type_filter = request.GET.get('type', '')
+    sort_by = request.GET.get('sort', '-start_date')
+    
+    if search_query:
+        conferences = conferences.filter(
+            models.Q(title__icontains=search_query) |
+            models.Q(description__icontains=search_query) |
+            models.Q(short_description__icontains=search_query)
+        )
+    
+    if status_filter:
+        conferences = conferences.filter(status=status_filter)
+    
+    if type_filter == 'online':
+        conferences = conferences.filter(is_online=True)
+    elif type_filter == 'offline':
+        conferences = conferences.filter(is_online=False)
+    
+    valid_sort_options = ['-start_date', 'start_date', '-created_at', 'created_at', 'title', '-title']
+    if sort_by not in valid_sort_options:
+        sort_by = '-start_date'
+    
+    conferences = conferences.order_by(sort_by)
+    
+    context = {
+        'conferences': conferences,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'type_filter': type_filter,
+        'sort_by': sort_by,
+    }
+    
+    return render(request, "events.html", context)
 
 
 def contact(request):
