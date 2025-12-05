@@ -57,7 +57,42 @@
                 </div>
             </div>
 
-            {% if is_curator %}
+            {% if is_admin %}
+            <div class="registrations-card">
+                <h2 class="section-title">
+                    <span class="title-icon">👑</span>
+                    Назначить куратора
+                </h2>
+                <div class="assign-curator-section">
+                    <div class="dropdown-container">
+                        <button id="dropdownToggle" class="dropdown-toggle">
+                            <span id="selectedUser">Выберите пользователя</span>
+                            <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div id="userDropdown" class="user-dropdown-menu" style="display: none;">
+                            <div class="dropdown-search">
+                                <input type="text" id="userSearch" class="form-control" placeholder="Поиск..." autocomplete="off">
+                            </div>
+                            <div class="user-dropdown-list">
+                                {% for user in users %}
+                                <div class="user-dropdown-item" data-user-id="{{ user.id }}" data-username="{{ user.username }}">
+                                    <span class="user-username">{{ user.username }}</span>
+                                    <span class="user-role">
+                                        {% if user.profile %}
+                                            {{ user.profile.get_role_display }}
+                                        {% else %}
+                                            Студент
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <button id="assignCuratorBtn" class="btn btn-primary" disabled>Назначить куратором</button>
+                </div>
+            </div>
+            {% elif is_curator %}
             <div class="registrations-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 class="section-title" style="margin: 0;">
@@ -327,6 +362,107 @@
                 }
             });
         }
+        
+        const dropdownToggle = document.getElementById('dropdownToggle');
+        const dropdown = document.getElementById('userDropdown');
+        const searchInput = document.getElementById('userSearch');
+        const selectedUserSpan = document.getElementById('selectedUser');
+        const assignBtn = document.getElementById('assignCuratorBtn');
+        let selectedUserId = null;
+        let allUsers = Array.from(document.querySelectorAll('.user-dropdown-item'));
+        
+        if (dropdownToggle && dropdown && searchInput && selectedUserSpan && assignBtn) {
+            function filterUsers(query) {
+                const lowerQuery = query.toLowerCase();
+                allUsers.forEach(item => {
+                    const username = item.getAttribute('data-username').toLowerCase();
+                    if (username.includes(lowerQuery)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            }
+            
+            dropdownToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const isOpen = dropdown.style.display === 'flex';
+                dropdown.style.display = isOpen ? 'none' : 'flex';
+                dropdownToggle.classList.toggle('active', !isOpen);
+                if (!isOpen) {
+                    searchInput.focus();
+                }
+            });
+            
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                filterUsers(query);
+            });
+            
+            searchInput.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+            
+            allUsers.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    selectedUserId = this.getAttribute('data-user-id');
+                    const username = this.getAttribute('data-username');
+                    selectedUserSpan.textContent = username;
+                    dropdown.style.display = 'none';
+                    dropdownToggle.classList.remove('active');
+                    assignBtn.disabled = false;
+                    searchInput.value = '';
+                    filterUsers('');
+                });
+            });
+            
+            document.addEventListener('click', function(e) {
+                if (!dropdownToggle.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                    dropdownToggle.classList.remove('active');
+                }
+            });
+            
+            assignBtn.addEventListener('click', function() {
+                if (!selectedUserId) return;
+                
+                const username = selectedUserSpan.textContent;
+                const confirmMessage = `Вы уверены, что хотите назначить пользователя "${username}" куратором?`;
+                
+                if (!confirm(confirmMessage)) {
+                    return;
+                }
+                
+                const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                
+                const formData = new FormData();
+                formData.append('user_id', selectedUserId);
+                
+                fetch('{% url "assign_curator" %}', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        selectedUserSpan.textContent = 'Выберите пользователя';
+                        selectedUserId = null;
+                        assignBtn.disabled = true;
+                        location.reload();
+                    } else {
+                        alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    alert('Произошла ошибка при назначении куратора');
+                });
+            });
+        }
     });
 </script>
 {% endblock %}
@@ -593,6 +729,117 @@
     margin-bottom: 30px;
 }
 
+.assign-curator-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 400px;
+}
+
+.dropdown-container {
+    position: relative;
+}
+
+.dropdown-toggle {
+    width: 100%;
+    padding: 10px 15px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: border-color 0.3s;
+}
+
+.dropdown-toggle:hover {
+    border-color: var(--primary-color);
+}
+
+.dropdown-arrow {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    transition: transform 0.3s;
+}
+
+.dropdown-toggle.active .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.user-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    z-index: 1000;
+    margin-top: 5px;
+    max-height: 350px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dropdown-search {
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dropdown-search .form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.dropdown-search .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+}
+
+.user-dropdown-list {
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.user-dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.user-dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.user-username {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    padding: 3px 6px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+}
+
 @media (max-width: 768px) {
     .profile-info-card,
     .registrations-card {
@@ -659,5 +906,6 @@
 }
 </style>
 {% endblock %}
+
 
 

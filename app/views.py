@@ -4,7 +4,10 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.db import IntegrityError
-from app.models import Conference, EventRegistration
+from app.models import Conference, EventRegistration, UserProfile
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 from app.forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
@@ -133,8 +136,15 @@ def profile_view(request):
     """Страница личного кабинета пользователя"""
     user_profile = getattr(request.user, 'profile', None)
     is_curator = user_profile and user_profile.is_curator()
+    is_admin = user_profile and user_profile.is_admin()
     
-    if is_curator:
+    if is_admin:
+        users = User.objects.all().select_related('profile').order_by('username')
+        context = {
+            'is_admin': True,
+            'users': users,
+        }
+    elif is_curator:
         curated_conferences = Conference.objects.filter(
             curator=request.user
         ).order_by('-created_at')
@@ -145,6 +155,7 @@ def profile_view(request):
             ).count()
         
         context = {
+            'is_admin': False,
             'is_curator': True,
             'curated_conferences': curated_conferences,
         }
@@ -153,6 +164,7 @@ def profile_view(request):
             user=request.user
         ).select_related('conference').order_by('-created_at')
         context = {
+            'is_admin': False,
             'is_curator': False,
             'registrations': registrations,
         }
@@ -297,3 +309,33 @@ def create_event_view(request):
     }
     
     return render(request, 'create_event.html', context)
+
+
+@login_required
+def assign_curator(request):
+    """Назначение пользователя куратором (для админа)"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        if not user_id:
+            return JsonResponse({'success': False, 'error': 'Не указан пользователь'}, status=400)
+        
+        try:
+            user = User.objects.get(id=user_id)
+            profile, created = UserProfile.objects.get_or_create(user=user)
+            profile.role = 'curator'
+            profile.save()
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Пользователь {user.username} успешно назначен куратором'
+            })
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Пользователь не найден'}, status=404)
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
