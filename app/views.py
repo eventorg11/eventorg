@@ -244,3 +244,27 @@ def event_participants_view(request, event_id):
     }
     
     return render(request, 'event_participants.html', context)
+
+
+@login_required
+def remove_participant(request, registration_id):
+    """Удаление регистрации участника (для куратора)"""
+    registration = get_object_or_404(EventRegistration, id=registration_id)
+    conference = registration.conference
+    
+    user_profile = getattr(request.user, 'profile', None)
+    is_curator = user_profile and user_profile.is_curator()
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not (is_curator and conference.curator == request.user) and not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if request.method == 'POST':
+        user_name = f"{registration.user.first_name} {registration.user.last_name}".strip() or registration.user.username
+        registration.delete()
+        return JsonResponse({
+            'success': True,
+            'message': f'Регистрация пользователя {user_name} успешно удалена'
+        })
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)

@@ -7,54 +7,17 @@
 <div class="profile-section">
     <div class="container">
         <div class="profile-content">
-            <div class="profile-header">
-                <h1 class="page-title">
-                    <span class="title-icon">👥</span>
-                    Участники мероприятия
-                </h1>
-                <a href="{% url 'profile' %}" class="btn btn-secondary">← Назад к личному кабинету</a>
-            </div>
-
-            <div class="event-info-card">
-                <h2 class="section-title">{{ conference.title }}</h2>
-                <div class="event-info-details">
-                    <div class="info-item">
-                        <span class="info-icon">📅</span>
-                        <div class="info-content">
-                            <span class="info-label">Дата мероприятия</span>
-                            <span class="info-value">{{ conference.start_date|date:"d.m.Y H:i" }}</span>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-icon">📍</span>
-                        <div class="info-content">
-                            <span class="info-label">Место проведения</span>
-                            <span class="info-value">
-                                {% if conference.is_online %}
-                                    Онлайн
-                                {% else %}
-                                    {{ conference.location }}
-                                {% endif %}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-icon">👥</span>
-                        <div class="info-content">
-                            <span class="info-label">Количество регистраций</span>
-                            <span class="info-value">
-                                {{ registration_count }}{% if max_participants %}/{{ max_participants }}{% endif %}
-                            </span>
-                        </div>
-                    </div>
+            <div class="participants-header">
+                <div>
+                    <h1 class="page-title">Участники: {{ conference.title }}</h1>
+                    <p class="participants-count">
+                        Зарегистрировано: {{ registration_count }}{% if max_participants %}/{{ max_participants }}{% endif %}
+                    </p>
                 </div>
+                <a href="{% url 'profile' %}" class="btn btn-secondary">← Назад</a>
             </div>
 
             <div class="registrations-card">
-                <h2 class="section-title">
-                    <span class="title-icon">📋</span>
-                    Список зарегистрированных пользователей
-                </h2>
                 {% if registrations %}
                 <div class="participants-list">
                     <table class="participants-table">
@@ -66,17 +29,26 @@
                                 <th>Имя пользователя</th>
                                 <th>Email</th>
                                 <th>Дата регистрации</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for registration in registrations %}
-                            <tr>
+                            <tr data-registration-id="{{ registration.id }}">
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ registration.user.first_name|default:"Не указано" }}</td>
-                                <td>{{ registration.user.last_name|default:"Не указано" }}</td>
+                                <td>{{ registration.user.first_name|default:"—" }}</td>
+                                <td>{{ registration.user.last_name|default:"—" }}</td>
                                 <td>{{ registration.user.username }}</td>
-                                <td>{{ registration.user.email|default:"Не указано" }}</td>
+                                <td>{{ registration.user.email|default:"—" }}</td>
                                 <td>{{ registration.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm remove-participant-btn" 
+                                            data-registration-id="{{ registration.id }}"
+                                            data-user-name="{{ registration.user.first_name }} {{ registration.user.last_name }}"
+                                            data-username="{{ registration.user.username }}">
+                                        Удалить
+                                    </button>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -91,75 +63,59 @@
         </div>
     </div>
 </div>
+
+<div id="confirmDialog" class="custom-dialog" style="display: none;">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title">Подтверждение удаления</h3>
+            <button class="custom-dialog-close" onclick="closeConfirmDialog()">×</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="confirmMessage"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary" onclick="closeConfirmDialog()">Отмена</button>
+            <button class="btn btn-danger" id="confirmDeleteBtn">Удалить</button>
+        </div>
+    </div>
+</div>
+
+<div id="messageDialog" class="custom-dialog" style="display: none;">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title" id="messageTitle"></h3>
+            <button class="custom-dialog-close" onclick="closeMessageDialog()">×</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="messageText"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-primary" onclick="closeMessageDialog()">ОК</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.profile-header {
+.participants-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .page-title {
     color: var(--primary-color);
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    margin: 0 0 5px 0;
+}
+
+.participants-count {
+    color: var(--text-color);
+    font-size: 1rem;
     margin: 0;
-}
-
-.event-info-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 30px;
-    border-radius: 15px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow);
-}
-
-.event-info-card .section-title {
-    color: white;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-}
-
-.event-info-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.event-info-card .info-item {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: rgba(255, 255, 255, 0.1);
-    padding: 15px;
-    border-radius: 10px;
-}
-
-.event-info-card .info-icon {
-    font-size: 1.5rem;
-}
-
-.event-info-card .info-content {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.event-info-card .info-label {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
-}
-
-.event-info-card .info-value {
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 600;
 }
 
 .participants-list {
@@ -176,15 +132,15 @@
 }
 
 .participants-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-color: var(--primary-color);
     color: white;
 }
 
 .participants-table th {
-    padding: 15px;
+    padding: 12px 15px;
     text-align: left;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .participants-table tbody tr {
@@ -201,9 +157,9 @@
 }
 
 .participants-table td {
-    padding: 15px;
+    padding: 12px 15px;
     color: var(--text-color);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
 }
 
 .participants-table tbody tr:nth-child(even) {
@@ -214,5 +170,109 @@
     background-color: #f0f0f0;
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+{% csrf_token %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+let currentRegistrationId = null;
+
+function showConfirmDialog(registrationId, userName, username) {
+    currentRegistrationId = registrationId;
+    const displayName = userName.trim() || username;
+    document.getElementById('confirmMessage').textContent = 
+        `Вы уверены, что хотите удалить регистрацию пользователя "${displayName}"?`;
+    document.getElementById('confirmDialog').style.display = 'flex';
+}
+
+function closeConfirmDialog() {
+    document.getElementById('confirmDialog').style.display = 'none';
+    currentRegistrationId = null;
+}
+
+function showMessageDialog(title, message) {
+    document.getElementById('messageTitle').textContent = title;
+    document.getElementById('messageText').textContent = message;
+    document.getElementById('messageDialog').style.display = 'flex';
+}
+
+function closeMessageDialog() {
+    document.getElementById('messageDialog').style.display = 'none';
+    if (currentRegistrationId === null) {
+        location.reload();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.remove-participant-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const registrationId = this.getAttribute('data-registration-id');
+            const userName = this.getAttribute('data-user-name');
+            const username = this.getAttribute('data-username');
+            showConfirmDialog(registrationId, userName, username);
+        });
+    });
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        if (!currentRegistrationId) return;
+
+        const registrationId = currentRegistrationId;
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(`/events/participants/remove/${registrationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            closeConfirmDialog();
+            if (data.success) {
+                const row = document.querySelector(`tr[data-registration-id="${registrationId}"]`);
+                if (row) {
+                    row.remove();
+                }
+                currentRegistrationId = null;
+                showMessageDialog('Успешно', data.message);
+            } else {
+                showMessageDialog('Ошибка', data.error || 'Произошла ошибка при удалении регистрации');
+            }
+        })
+        .catch(error => {
+            closeConfirmDialog();
+            showMessageDialog('Ошибка', 'Произошла ошибка при удалении регистрации');
+        });
+    });
+
+    document.getElementById('confirmDialog').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeConfirmDialog();
+        }
+    });
+
+    document.getElementById('messageDialog').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeMessageDialog();
+        }
+    });
+});
+</script>
 {% endblock %}
 
