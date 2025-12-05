@@ -229,9 +229,11 @@ def profile_view(request):
     
     if is_admin:
         users = User.objects.all().select_related('profile').order_by('username')
+        contact_messages = ContactMessage.objects.all().order_by('-created_at')
         context = {
             'is_admin': True,
             'users': users,
+            'contact_messages': contact_messages,
         }
     elif is_curator:
         curated_conferences = Conference.objects.filter(
@@ -525,3 +527,57 @@ def export_conferences_excel(request):
     
     wb.save(response)
     return response
+
+
+@login_required
+def update_message_status(request, message_id):
+    """Обновление статуса сообщения обратной связи (для админа)"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            message = ContactMessage.objects.get(id=message_id)
+            new_status = request.POST.get('status')
+            
+            if new_status in ['new', 'read', 'replied']:
+                message.status = new_status
+                message.save()
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Статус сообщения обновлен',
+                    'new_status': message.get_status_display()
+                })
+            else:
+                return JsonResponse({'success': False, 'error': 'Неверный статус'}, status=400)
+        except ContactMessage.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Сообщение не найдено'}, status=404)
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)
+
+
+@login_required
+def delete_message(request, message_id):
+    """Удаление сообщения обратной связи (для админа)"""
+    user_profile = getattr(request.user, 'profile', None)
+    is_admin = user_profile and user_profile.is_admin()
+    
+    if not is_admin:
+        return JsonResponse({'success': False, 'error': 'Нет доступа'}, status=403)
+    
+    if request.method == 'POST':
+        try:
+            message = ContactMessage.objects.get(id=message_id)
+            subject = message.subject
+            message.delete()
+            return JsonResponse({
+                'success': True,
+                'message': f'Сообщение "{subject}" успешно удалено'
+            })
+        except ContactMessage.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Сообщение не найдено'}, status=404)
+    
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'}, status=400)

@@ -155,6 +155,63 @@
                     </div>
                 </div>
             </div>
+            
+            <div class="registrations-card" style="margin-top: 20px;">
+                <h2 class="section-title">
+                    <span class="title-icon">📬</span>
+                    Сообщения обратной связи
+                </h2>
+                {% if contact_messages %}
+                <div class="feedback-messages-list">
+                    {% for message in contact_messages %}
+                    <div class="feedback-message-item" data-message-id="{{ message.id }}">
+                        <div class="feedback-message-header">
+                            <div class="feedback-message-info">
+                                <h3 class="feedback-message-subject">{{ message.subject }}</h3>
+                                <div class="feedback-message-meta">
+                                    <span class="feedback-message-author">👤 {{ message.name }}</span>
+                                    <span class="feedback-message-email">📧 {{ message.email }}</span>
+                                    <span class="feedback-message-date">📅 {{ message.created_at|date:"d.m.Y H:i" }}</span>
+                                    {% if message.user %}
+                                    <span class="feedback-message-user">🔗 Пользователь: {{ message.user.username }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="feedback-message-status">
+                                <span class="status-badge status-{{ message.status }}">
+                                    {{ message.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="feedback-message-body">
+                            <p class="feedback-message-text">{{ message.message }}</p>
+                        </div>
+                        <div class="feedback-message-actions">
+                            <button class="btn btn-sm btn-secondary mark-read-btn" 
+                                    data-message-id="{{ message.id }}"
+                                    {% if message.status == 'read' or message.status == 'replied' %}style="display: none;"{% endif %}>
+                                Отметить прочитанным
+                            </button>
+                            <button class="btn btn-sm btn-primary mark-replied-btn" 
+                                    data-message-id="{{ message.id }}"
+                                    {% if message.status == 'replied' %}style="display: none;"{% endif %}>
+                                Отметить отвеченным
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-message-btn" 
+                                    data-message-id="{{ message.id }}"
+                                    data-message-subject="{{ message.subject }}">
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="no-feedback-messages">
+                    <p>Нет сообщений обратной связи</p>
+                </div>
+                {% endif %}
+            </div>
             {% elif is_curator %}
             <div class="registrations-card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -341,7 +398,25 @@
             <button class="btn btn-danger" id="confirmDeleteUserBtn">Удалить</button>
         </div>
     </div>
+            </div>
+
+{% if is_admin %}
+<div class="custom-dialog" id="confirmDeleteMessageDialog">
+    <div class="custom-dialog-content">
+        <div class="custom-dialog-header">
+            <h3 class="custom-dialog-title">Подтверждение удаления</h3>
+            <button class="custom-dialog-close" onclick="closeCustomDialog('confirmDeleteMessageDialog')">&times;</button>
+        </div>
+        <div class="custom-dialog-body">
+            <p class="custom-dialog-message" id="confirmDeleteMessageText"></p>
+        </div>
+        <div class="custom-dialog-footer">
+            <button class="btn btn-secondary" onclick="closeCustomDialog('confirmDeleteMessageDialog')">Отмена</button>
+            <button class="btn btn-danger" id="confirmDeleteMessageBtn">Удалить</button>
+        </div>
+    </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -706,6 +781,160 @@
                 deleteDropdownToggle.classList.remove('active');
             }
         });
+        
+        {% if is_admin %}
+        const markReadButtons = document.querySelectorAll('.mark-read-btn');
+        const markRepliedButtons = document.querySelectorAll('.mark-replied-btn');
+        const deleteMessageButtons = document.querySelectorAll('.delete-message-btn');
+        
+        markReadButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                const messageItem = this.closest('.feedback-message-item');
+                
+                const csrftoken = getCookie('csrftoken');
+                const formData = new FormData();
+                formData.append('status', 'read');
+                
+                fetch('/profile/message/' + messageId + '/update-status/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const statusBadge = messageItem.querySelector('.status-badge');
+                        statusBadge.textContent = data.new_status;
+                        statusBadge.className = 'status-badge status-read';
+                        this.style.display = 'none';
+                        const markRepliedBtn = messageItem.querySelector('.mark-replied-btn');
+                        if (markRepliedBtn) {
+                            markRepliedBtn.style.display = 'inline-block';
+                        }
+                        showMessage('Успех', 'Сообщение отмечено как прочитанное', 'success');
+                    } else {
+                        showMessage('Ошибка', data.error || 'Не удалось обновить статус', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Ошибка', 'Произошла ошибка при обновлении статуса', 'error');
+                });
+            });
+        });
+        
+        markRepliedButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                const messageItem = this.closest('.feedback-message-item');
+                
+                const csrftoken = getCookie('csrftoken');
+                const formData = new FormData();
+                formData.append('status', 'replied');
+                
+                fetch('/profile/message/' + messageId + '/update-status/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const statusBadge = messageItem.querySelector('.status-badge');
+                        statusBadge.textContent = data.new_status;
+                        statusBadge.className = 'status-badge status-replied';
+                        this.style.display = 'none';
+                        const markReadBtn = messageItem.querySelector('.mark-read-btn');
+                        if (markReadBtn) {
+                            markReadBtn.style.display = 'none';
+                        }
+                        showMessage('Успех', 'Сообщение отмечено как отвеченное', 'success');
+                    } else {
+                        showMessage('Ошибка', data.error || 'Не удалось обновить статус', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Ошибка', 'Произошла ошибка при обновлении статуса', 'error');
+                });
+            });
+        });
+        
+        deleteMessageButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                const messageSubject = this.getAttribute('data-message-subject');
+                const messageItem = this.closest('.feedback-message-item');
+                
+                document.getElementById('confirmDeleteMessageText').textContent = 
+                    `Вы уверены, что хотите удалить сообщение "${messageSubject}"? Это действие нельзя отменить!`;
+                const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
+                if (confirmDeleteMessageBtn) {
+                    confirmDeleteMessageBtn.setAttribute('data-message-id', messageId);
+                    confirmDeleteMessageBtn.setAttribute('data-message-item', messageItem ? 'true' : 'false');
+                }
+                showCustomDialog('confirmDeleteMessageDialog');
+            });
+        });
+        
+        const confirmDeleteMessageBtn = document.getElementById('confirmDeleteMessageBtn');
+        if (confirmDeleteMessageBtn) {
+            confirmDeleteMessageBtn.addEventListener('click', function() {
+                const messageId = this.getAttribute('data-message-id');
+                if (!messageId) {
+                    closeCustomDialog('confirmDeleteMessageDialog');
+                    showMessage('Ошибка', 'Сообщение не выбрано', 'error');
+                    return;
+                }
+                
+                const csrftoken = getCookie('csrftoken');
+                
+                closeCustomDialog('confirmDeleteMessageDialog');
+                
+                fetch('/profile/message/' + messageId + '/delete/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const messageItem = document.querySelector(`.feedback-message-item[data-message-id="${messageId}"]`);
+                        if (messageItem) {
+                            messageItem.style.transition = 'opacity 0.3s';
+                            messageItem.style.opacity = '0';
+                            setTimeout(() => {
+                                messageItem.remove();
+                                const messagesList = document.querySelector('.feedback-messages-list');
+                                if (messagesList && messagesList.children.length === 0) {
+                                    messagesList.innerHTML = '<div class="no-feedback-messages"><p>Нет сообщений обратной связи</p></div>';
+                                }
+                            }, 300);
+                        }
+                        showMessage('Успех', data.message, 'success');
+                    } else {
+                        showMessage('Ошибка', data.error || 'Не удалось удалить сообщение', 'error');
+                    }
+                })
+                .catch(error => {
+                    showMessage('Ошибка', 'Произошла ошибка при удалении сообщения', 'error');
+                });
+            });
+        }
+        
+        const confirmDeleteMessageDialog = document.getElementById('confirmDeleteMessageDialog');
+        if (confirmDeleteMessageDialog) {
+            confirmDeleteMessageDialog.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeCustomDialog('confirmDeleteMessageDialog');
+                }
+            });
+        }
+        {% endif %}
     });
 </script>
 {% endblock %}

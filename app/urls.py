@@ -22,4 +22,6 @@ urlpatterns = [
     path("profile/assign-curator/", views.assign_curator, name="assign_curator"),
     path("profile/delete-user/", views.delete_user, name="delete_user"),
     path("profile/export-excel/", views.export_conferences_excel, name="export_excel"),
+    path("profile/message/<int:message_id>/update-status/", views.update_message_status, name="update_message_status"),
+    path("profile/message/<int:message_id>/delete/", views.delete_message, name="delete_message"),
 ]

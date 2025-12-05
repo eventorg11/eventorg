@@ -2,18 +2,6 @@
 
 {% block title %}Главная - Система организации научной конференции{% endblock %}
 
-{% block breadcrumb %}
-<div class="breadcrumb">
-    <div class="breadcrumb-container">
-        <ul class="breadcrumb-list">
-            <li class="breadcrumb-item active">
-                <span>Главная</span>
-            </li>
-        </ul>
-    </div>
-</div>
-{% endblock %}
-
 {% block content %}
 <div class="hero-section">
     <div class="container">
@@ -24,8 +12,7 @@
                 Московского университета имени С.Ю. Витте
             </p>
             <div class="hero-buttons">
-                <a href="#register" class="btn btn-primary">Регистрация участника</a>
-                <a href="{% url 'events' %}" class="btn btn-secondary">Посмотреть мероприятия</a>
+                <a href="{% url 'events' %}" class="btn btn-primary">Посмотреть мероприятия</a>
             </div>
         </div>
     </div>
@@ -114,7 +101,7 @@
         <div class="cta-content">
             <h2>Готовы принять участие?</h2>
             <p>Зарегистрируйтесь в системе и станьте частью научного сообщества</p>
-            <a href="#register" class="btn btn-primary btn-large">Начать регистрацию</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-large">Начать регистрацию</a>
         </div>
     </div>
 </section>
