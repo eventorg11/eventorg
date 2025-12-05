@@ -25,8 +25,8 @@
                         <li><a href="{% url 'contact' %}">Контакты</a></li>
                         {% if user.is_authenticated %}
                             <li class="user-menu-container">
-                                <a href="#" class="user-name" id="userMenuToggle">{{ user.username }} ▼</a>
-                                <ul class="user-dropdown" id="userDropdown">
+                                <a href="#" class="user-name">{{ user.username }} ▼</a>
+                                <ul class="user-dropdown">
                                     <li><a href="#profile">Профиль</a></li>
                                     <li><a href="#settings">Настройки</a></li>
                                     <li><a href="{% url 'logout' %}">Выход</a></li>
@@ -78,25 +78,6 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const userMenuToggle = document.getElementById('userMenuToggle');
-            const userDropdown = document.getElementById('userDropdown');
-            
-            if (userMenuToggle && userDropdown) {
-                userMenuToggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    userDropdown.classList.toggle('active');
-                });
-                
-                document.addEventListener('click', function(e) {
-                    if (!userMenuToggle.contains(e.target) && !userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('active');
-                    }
-                });
-            }
-        });
-    </script>
 </body>
 </html>
 
