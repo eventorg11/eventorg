@@ -80,9 +80,10 @@
                 <form method="post" class="settings-form">
                     {% csrf_token %}
                     <input type="hidden" name="password_submit" value="1">
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="{{ password_form.old_password.id_for_label }}">Текущий пароль</label>
                         {{ password_form.old_password }}
+                        <button type="button" class="toggle-password" data-target="{{ password_form.old_password.id_for_label }}">👁</button>
                         {% if password_form.old_password.errors %}
                         <div class="field-errors">
                             {% for error in password_form.old_password.errors %}
@@ -92,9 +93,10 @@
                         {% endif %}
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group password-field">
                             <label for="{{ password_form.new_password1.id_for_label }}">Новый пароль</label>
                             {{ password_form.new_password1 }}
+                            <button type="button" class="toggle-password" data-target="{{ password_form.new_password1.id_for_label }}">👁</button>
                             {% if password_form.new_password1.errors %}
                             <div class="field-errors">
                                 {% for error in password_form.new_password1.errors %}
@@ -103,9 +105,10 @@
                             </div>
                             {% endif %}
                         </div>
-                        <div class="form-group">
+                        <div class="form-group password-field">
                             <label for="{{ password_form.new_password2.id_for_label }}">Подтверждение пароля</label>
                             {{ password_form.new_password2 }}
+                            <button type="button" class="toggle-password" data-target="{{ password_form.new_password2.id_for_label }}">👁</button>
                             {% if password_form.new_password2.errors %}
                             <div class="field-errors">
                                 {% for error in password_form.new_password2.errors %}
@@ -131,6 +134,7 @@
     </div>
 </div>
 {% endblock %}
+
 
 {% block extra_css %}
 <style>
@@ -252,5 +256,42 @@
     }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function centerPasswordIcons() {
+        document.querySelectorAll('.password-field').forEach(function(field) {
+            const input = field.querySelector('.form-control');
+            const icon = field.querySelector('.toggle-password');
+            if (input && icon) {
+                const inputRect = input.getBoundingClientRect();
+                const fieldRect = field.getBoundingClientRect();
+                const inputTop = inputRect.top - fieldRect.top;
+                const inputHeight = inputRect.height;
+                const iconHeight = icon.offsetHeight;
+                const top = inputTop + (inputHeight / 2) - (iconHeight / 2);
+                icon.style.top = top + 'px';
+                icon.style.transform = 'none';
+            }
+        });
+    }
+    
+    centerPasswordIcons();
+    window.addEventListener('resize', centerPasswordIcons);
+    
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        btn.addEventListener('click', function() {
+            if (!input) return;
+            const isPassword = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPassword ? 'text' : 'password');
+            btn.textContent = isPassword ? '👁‍🗨' : '👁';
+        });
+    });
+});
+</script>
 {% endblock %}
 

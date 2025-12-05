@@ -74,9 +74,10 @@
                         </div>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
                         {{ form.password1 }}
+                        <button type="button" class="toggle-password" data-target="{{ form.password1.id_for_label }}">👁</button>
                         {% if form.password1.errors %}
                             <div class="field-errors">
                                 {% for error in form.password1.errors %}
@@ -89,9 +90,10 @@
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
                         {{ form.password2 }}
+                        <button type="button" class="toggle-password" data-target="{{ form.password2.id_for_label }}">👁</button>
                         {% if form.password2.errors %}
                             <div class="field-errors">
                                 {% for error in form.password2.errors %}
@@ -111,5 +113,42 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function centerPasswordIcons() {
+        document.querySelectorAll('.password-field').forEach(function(field) {
+            const input = field.querySelector('.form-control');
+            const icon = field.querySelector('.toggle-password');
+            if (input && icon) {
+                const inputRect = input.getBoundingClientRect();
+                const fieldRect = field.getBoundingClientRect();
+                const inputTop = inputRect.top - fieldRect.top;
+                const inputHeight = inputRect.height;
+                const iconHeight = icon.offsetHeight;
+                const top = inputTop + (inputHeight / 2) - (iconHeight / 2);
+                icon.style.top = top + 'px';
+                icon.style.transform = 'none';
+            }
+        });
+    }
+    
+    centerPasswordIcons();
+    window.addEventListener('resize', centerPasswordIcons);
+    
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        btn.addEventListener('click', function() {
+            if (!input) return;
+            const isPassword = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPassword ? 'text' : 'password');
+            btn.textContent = isPassword ? '👁‍🗨' : '👁';
+        });
+    });
+});
+</script>
 {% endblock %}
 

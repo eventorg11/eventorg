@@ -1893,6 +1893,40 @@ body {
     }
 }
 
+/* Password visibility toggle */
+.password-field {
+    position: relative;
+}
+
+.password-field .form-control {
+    padding-right: 50px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: calc(0.95rem + 8px + 12px + 0.5rem);
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 1.4rem;
+    line-height: 1;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    margin: 0;
+}
+
+.toggle-password:hover {
+    color: var(--primary-color);
+}
+
 /* Custom Dialog Styles */
 .custom-dialog {
     display: none;

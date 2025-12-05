@@ -36,9 +36,10 @@
                         {% endif %}
                     </div>
                     
-                    <div class="form-group">
+                    <div class="form-group password-field">
                         <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
                         {{ form.password }}
+                        <button type="button" class="toggle-password" data-target="{{ form.password.id_for_label }}">👁</button>
                         {% if form.password.errors %}
                             <div class="field-errors">
                                 {% for error in form.password.errors %}
@@ -58,5 +59,42 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function centerPasswordIcons() {
+        document.querySelectorAll('.password-field').forEach(function(field) {
+            const input = field.querySelector('.form-control');
+            const icon = field.querySelector('.toggle-password');
+            if (input && icon) {
+                const inputRect = input.getBoundingClientRect();
+                const fieldRect = field.getBoundingClientRect();
+                const inputTop = inputRect.top - fieldRect.top;
+                const inputHeight = inputRect.height;
+                const iconHeight = icon.offsetHeight;
+                const top = inputTop + (inputHeight / 2) - (iconHeight / 2);
+                icon.style.top = top + 'px';
+                icon.style.transform = 'none';
+            }
+        });
+    }
+    
+    centerPasswordIcons();
+    window.addEventListener('resize', centerPasswordIcons);
+    
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        btn.addEventListener('click', function() {
+            if (!input) return;
+            const isPassword = input.getAttribute('type') === 'password';
+            input.setAttribute('type', isPassword ? 'text' : 'password');
+            btn.textContent = isPassword ? '👁‍🗨' : '👁';
+        });
+    });
+});
+</script>
 {% endblock %}
 
