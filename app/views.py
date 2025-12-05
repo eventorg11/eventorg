@@ -14,3 +14,8 @@ def events(request):
     """Страница со списком всех мероприятий"""
     conferences = Conference.objects.all().order_by("-start_date")
     return render(request, "events.html", {"conferences": conferences})
+
+
+def contact(request):
+    """Страница контактов"""
+    return render(request, "contact.html")
