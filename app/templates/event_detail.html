@@ -237,6 +237,9 @@
                     const url = '/events/' + eventId + '/register/';
                     const csrftoken = getCookie('csrftoken');
                     
+                    confirmBtn.disabled = true;
+                    confirmBtn.textContent = 'Регистрация...';
+                    
                     fetch(url, {
                         method: 'POST',
                         headers: {
@@ -247,14 +250,20 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            closeModalFunc();
+                            alert(data.message || 'Вы успешно зарегистрированы на мероприятие');
                             window.location.reload();
                         } else {
                             alert(data.error || 'Произошла ошибка при регистрации');
+                            confirmBtn.disabled = false;
+                            confirmBtn.textContent = 'Зарегистрироваться';
                         }
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         alert('Произошла ошибка при регистрации');
+                        confirmBtn.disabled = false;
+                        confirmBtn.textContent = 'Зарегистрироваться';
                     });
                 });
             }
